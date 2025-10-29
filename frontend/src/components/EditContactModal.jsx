@@ -1,261 +1,242 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 
 const API_BASE_URL = 'http://localhost:8080/api/contacts';
 
 function EditContactModal({ contact, onSave, onCancel, token }) {
-     // Initialize with default empty arrays if contact doesn't have them
-     const [formData, setFormData] = useState({
-         ...contact,
-         emails: Array.isArray(contact?.emails) && contact.emails.length > 0 ? [...contact.emails] : [{ id: null, label: '', email: '' }],
-         phones: Array.isArray(contact?.phones) && contact.phones.length > 0 ? [...contact.phones] : [{ id: null, label: '', phoneNumber: '' }],
-     });
-     const [isSaving, setIsSaving] = useState(false);
-     const [error, setError] = useState('');
 
-     // Update formData when the contact prop changes
-     useEffect(() => {
-         setFormData({
-             ...contact,
-             // Ensure there's always at least one email/phone field showing
-             emails: Array.isArray(contact?.emails) && contact.emails.length > 0 ? [...contact.emails] : [{ id: null, label: '', email: '' }],
-             phones: Array.isArray(contact?.phones) && contact.phones.length > 0 ? [...contact.phones] : [{ id: null, label: '', phoneNumber: '' }],
-         });
-         setError('');
-     }, [contact]);
+    const [formData, setFormData] = useState({
+        ...contact,
+        emails: Array.isArray(contact?.emails) && contact.emails.length > 0 ? [...contact.emails] : [{ id: null, label: '', email: '' }],
+        phones: Array.isArray(contact?.phones) && contact.phones.length > 0 ? [...contact.phones] : [{ id: null, label: '', phoneNumber: '' }],
+    });
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState('');
 
-     // --- Handlers for Top-Level Fields ---
-     const handleChange = (e) => {
-         const { name, value } = e.target;
-         setFormData(prev => ({ ...prev, [name]: value }));
-     };
+    useEffect(() => {
+        setFormData({
+            ...contact,
+            emails: Array.isArray(contact?.emails) && contact.emails.length > 0 ? [...contact.emails] : [{ id: null, label: '', email: '' }],
+            phones: Array.isArray(contact?.phones) && contact.phones.length > 0 ? [...contact.phones] : [{ id: null, label: '', phoneNumber: '' }],
+        });
+        setError('');
+    }, [contact]);
 
-     // --- Handlers for Nested Email/Phone Arrays ---
-      const handleNestedChange = (e, type, index, field) => {
-          const { value } = e.target;
-          setFormData(prev => {
-              const updatedArray = prev[type].map((item, i) =>
-                  i === index ? { ...item, [field]: value } : item
-              );
-              return { ...prev, [type]: updatedArray };
-          });
-      };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
-      const handleAddItem = (type) => {
-          setFormData(prev => ({
-              ...prev,
-              [type]: [...prev[type], type === 'emails' ? { id: null, label: '', email: '' } : { id: null, label: '', phoneNumber: '' }]
-          }));
-      };
+    const handleNestedChange = (e, type, index, field) => {
+        const { value } = e.target;
+        setFormData(prev => {
+            const updatedArray = prev[type].map((item, i) =>
+                i === index ? { ...item, [field]: value } : item
+            );
+            return { ...prev, [type]: updatedArray };
+        });
+    };
 
-      const handleRemoveItem = (type, index) => {
-          // Prevent removing the last item if validation requires at least one
-          if (formData[type].length <= 1) {
-              setError(`At least one ${type === 'emails' ? 'email' : 'phone number'} is required.`);
-              return;
-          }
-          setError(''); // Clear error if removing is allowed
-          setFormData(prev => ({
-              ...prev,
-              [type]: prev[type].filter((_, i) => i !== index)
-          }));
-      };
-     // --------------------------------------------------
+    const handleAddItem = (type) => {
+        setFormData(prev => ({
+            ...prev,
+            [type]: [...prev[type], type === 'emails' ? { id: null, label: '', email: '' } : { id: null, label: '', phoneNumber: '' }]
+        }));
+    };
 
-     const handleSubmit = async (e) => {
-         e.preventDefault();
-         setIsSaving(true);
-         setError('');
-         console.log("Saving changes for contact:", formData.id, formData);
+    const handleRemoveItem = (type, index) => {
+        if (formData[type].length <= 1) {
+            setError(`At least one ${type === 'emails' ? 'email' : 'phone number'} is required.`);
+            return;
+        }
+        setError('');
+        setFormData(prev => ({
+            ...prev,
+            [type]: prev[type].filter((_, i) => i !== index)
+        }));
+    };
 
-         // Filter out empty emails/phones before validation and sending
-         const validEmails = formData.emails.filter(e => e.email && e.email.trim() !== '');
-         const validPhones = formData.phones.filter(p => p.phoneNumber && p.phoneNumber.trim() !== '');
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSaving(true);
+        setError('');
+        console.log("Saving changes for contact:", formData.id, formData);
 
+        const validEmails = formData.emails.filter(e => e.email && e.email.trim() !== '');
+        const validPhones = formData.phones.filter(p => p.phoneNumber && p.phoneNumber.trim() !== '');
 
-         // Basic validation
-         if (!formData.firstName || !formData.title || validEmails.length === 0 || validPhones.length === 0) {
-              setError('First Name, Title, at least one valid Email, and at least one valid Phone are required.');
-              setIsSaving(false);
-              return;
-         }
+        if (!formData.firstName || !formData.title || validEmails.length === 0 || validPhones.length === 0) {
+            setError('First Name, Title, at least one valid Email, and at least one valid Phone are required.');
+            setIsSaving(false);
+            return;
+        }
 
-         // Prepare data for API (send only necessary fields, exclude temporary IDs if needed)
-         const emailsToSend = validEmails.map(e => ({ label: e.label || '', email: e.email })); // Ensure label isn't null
-         const phonesToSend = validPhones.map(p => ({ label: p.label || '', phoneNumber: p.phoneNumber })); // Ensure label isn't null
+        const emailsToSend = validEmails.map(e => ({ label: e.label || '', email: e.email }));
+        const phonesToSend = validPhones.map(p => ({ label: p.label || '', phoneNumber: p.phoneNumber }));
 
 
-         try {
-             const response = await fetch(`${API_BASE_URL}/${formData.id}`, {
-                 method: 'PUT',
-                 headers: {
-                     'Authorization': `Bearer ${token}`,
-                     'Content-Type': 'application/json',
-                 },
-                 body: JSON.stringify({
-                     firstName: formData.firstName,
-                     lastName: formData.lastName || '',
-                     title: formData.title,
-                     emails: emailsToSend,
-                     phones: phonesToSend,
-                 }),
-             });
+        try {
+            const response = await fetch(`${API_BASE_URL}/${formData.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    firstName: formData.firstName,
+                    lastName: formData.lastName || '',
+                    title: formData.title,
+                    emails: emailsToSend,
+                    phones: phonesToSend,
+                }),
+            });
 
-             const data = await response.json().catch(() => ({}));
+            const data = await response.json().catch(() => ({}));
 
-             if (!response.ok) {
-                 throw new Error(data.error || `Failed to update contact: ${response.statusText || response.status}`);
-             }
+            if (!response.ok) {
+                throw new Error(data.error || `Failed to update contact: ${response.statusText || response.status}`);
+            }
 
-             console.log("Update successful:", data);
-             onSave(data);
+            console.log("Update successful:", data);
+            onSave(data);
 
-         } catch (err) {
-             console.error("Error updating contact:", err);
-             setError(err.message || 'Could not save changes.');
-         } finally {
-             setIsSaving(false);
-         }
-     };
+        } catch (err) {
+            console.error("Error updating contact:", err);
+            setError(err.message || 'Could not save changes.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
-     if (!contact) return null;
+    if (!contact) return null;
 
-     return (
-         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
-             <div className="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
-                 <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Edit Contact</h3>
-                 {error && <p className="text-red-500 text-sm mb-3 bg-red-100 p-2 rounded-md border border-red-200">{error}</p>}
-                 {/* Increased max height and added overflow for scrolling */}
-                 <form onSubmit={handleSubmit} className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
-                     {/* --- Name and Title Inputs (same as before) --- */}
-                     <div>
-                         <label htmlFor="edit-firstName" className="text-sm font-medium text-gray-700">First Name *</label>
-                         <input type="text" id="edit-firstName" name="firstName" value={formData.firstName || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
-                     </div>
-                     <div>
-                         <label htmlFor="edit-lastName" className="text-sm font-medium text-gray-700">Last Name</label>
-                         <input type="text" id="edit-lastName" name="lastName" value={formData.lastName || ''} onChange={handleChange} className="mt-1 w-full input-style" />
-                     </div>
-                     <div>
-                         <label htmlFor="edit-title" className="text-sm font-medium text-gray-700">Title *</label>
-                         <input type="text" id="edit-title" name="title" value={formData.title || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
-                     </div>
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
+            <div className="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+                <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Edit Contact</h3>
+                {error && <p className="text-red-500 text-sm mb-3 bg-red-100 p-2 rounded-md border border-red-200">{error}</p>}
+                <form onSubmit={handleSubmit} className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
+                    <div>
+                        <label htmlFor="edit-firstName" className="text-sm font-medium text-gray-700">First Name *</label>
+                        <input type="text" id="edit-firstName" name="firstName" value={formData.firstName || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
+                    </div>
+                    <div>
+                        <label htmlFor="edit-lastName" className="text-sm font-medium text-gray-700">Last Name</label>
+                        <input type="text" id="edit-lastName" name="lastName" value={formData.lastName || ''} onChange={handleChange} className="mt-1 w-full input-style" />
+                    </div>
+                    <div>
+                        <label htmlFor="edit-title" className="text-sm font-medium text-gray-700">Title *</label>
+                        <input type="text" id="edit-title" name="title" value={formData.title || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
+                    </div>
 
-                     {/* --- Dynamic Email Inputs --- */}
-                     <fieldset className="border p-3 rounded-md space-y-2">
-                         <legend className="text-sm font-medium text-gray-700 px-1">Emails *</legend>
-                         {formData.emails?.map((emailItem, index) => (
-                             <div key={index} className="grid grid-cols-6 gap-2 items-end">
-                                 <div className="col-span-2">
-                                     <label htmlFor={`edit-email-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
-                                     <input
-                                         type="text"
-                                         id={`edit-email-label-${index}`}
-                                         value={emailItem.label || ''}
-                                         onChange={(e) => handleNestedChange(e, 'emails', index, 'label')}
-                                         className="mt-1 w-full input-style-sm"
-                                         placeholder="e.g., Work"
-                                     />
-                                 </div>
-                                 <div className="col-span-3">
-                                     <label htmlFor={`edit-email-value-${index}`} className="text-xs font-medium text-gray-600">Email Address</label>
-                                     <input
-                                         type="email"
-                                         id={`edit-email-value-${index}`}
-                                         value={emailItem.email || ''}
-                                         onChange={(e) => handleNestedChange(e, 'emails', index, 'email')}
-                                         className="mt-1 w-full input-style-sm"
-                                         placeholder="name@example.com"
-                                         required={index === 0} // Only first required visually, form validation checks length
-                                     />
-                                 </div>
-                                 <div className="col-span-1">
-                                     {formData.emails.length > 1 && ( // Show remove button only if more than one email
-                                         <button
-                                             type="button"
-                                             onClick={() => handleRemoveItem('emails', index)}
-                                             className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none"
-                                             aria-label={`Remove email ${index + 1}`}
-                                         >
-                                             Remove
-                                         </button>
-                                     )}
-                                 </div>
-                             </div>
-                         ))}
-                         <button
-                             type="button"
-                             onClick={() => handleAddItem('emails')}
-                             className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
-                         >
-                             + Add Email
-                         </button>
-                     </fieldset>
-                     {/* ----------------------------- */}
+                    <fieldset className="border p-3 rounded-md space-y-2">
+                        <legend className="text-sm font-medium text-gray-700 px-1">Emails *</legend>
+                        {formData.emails?.map((emailItem, index) => (
+                            <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                <div className="col-span-2">
+                                    <label htmlFor={`edit-email-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
+                                    <input
+                                        type="text"
+                                        id={`edit-email-label-${index}`}
+                                        value={emailItem.label || ''}
+                                        onChange={(e) => handleNestedChange(e, 'emails', index, 'label')}
+                                        className="mt-1 w-full input-style-sm"
+                                        placeholder="e.g., Work"
+                                    />
+                                </div>
+                                <div className="col-span-3">
+                                    <label htmlFor={`edit-email-value-${index}`} className="text-xs font-medium text-gray-600">Email Address</label>
+                                    <input
+                                        type="email"
+                                        id={`edit-email-value-${index}`}
+                                        value={emailItem.email || ''}
+                                        onChange={(e) => handleNestedChange(e, 'emails', index, 'email')}
+                                        className="mt-1 w-full input-style-sm"
+                                        placeholder="name@example.com"
+                                        required={index === 0}
+                                    />
+                                </div>
+                                <div className="col-span-1">
+                                    {formData.emails.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveItem('emails', index)}
+                                            className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none"
+                                            aria-label={`Remove email ${index + 1}`}
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={() => handleAddItem('emails')}
+                            className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
+                        >
+                            + Add Email
+                        </button>
+                    </fieldset>
 
-                     {/* --- Dynamic Phone Inputs --- */}
-                     <fieldset className="border p-3 rounded-md space-y-2">
-                         <legend className="text-sm font-medium text-gray-700 px-1">Phone Numbers *</legend>
-                         {formData.phones?.map((phoneItem, index) => (
-                             <div key={index} className="grid grid-cols-6 gap-2 items-end">
-                                 <div className="col-span-2">
-                                     <label htmlFor={`edit-phone-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
-                                     <input
-                                         type="text"
-                                         id={`edit-phone-label-${index}`}
-                                         value={phoneItem.label || ''}
-                                         onChange={(e) => handleNestedChange(e, 'phones', index, 'label')}
-                                         className="mt-1 w-full input-style-sm"
-                                         placeholder="e.g., Mobile"
-                                     />
-                                 </div>
-                                 <div className="col-span-3">
-                                     <label htmlFor={`edit-phone-value-${index}`} className="text-xs font-medium text-gray-600">Phone Number</label>
-                                     <input
-                                         type="tel"
-                                         id={`edit-phone-value-${index}`}
-                                         value={phoneItem.phoneNumber || ''}
-                                         onChange={(e) => handleNestedChange(e, 'phones', index, 'phoneNumber')}
-                                         className="mt-1 w-full input-style-sm"
-                                         placeholder="+92..."
-                                         required={index === 0} // Only first required visually
-                                     />
-                                 </div>
-                                  <div className="col-span-1">
-                                     {formData.phones.length > 1 && ( // Show remove button only if more than one phone
-                                         <button
-                                             type="button"
-                                             onClick={() => handleRemoveItem('phones', index)}
-                                             className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none"
-                                             aria-label={`Remove phone ${index + 1}`}
-                                         >
-                                             Remove
-                                         </button>
-                                     )}
-                                 </div>
-                             </div>
-                         ))}
-                         <button
-                             type="button"
-                             onClick={() => handleAddItem('phones')}
-                             className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
-                         >
-                             + Add Phone
-                         </button>
-                     </fieldset>
-                     {/* ---------------------------- */}
+                    <fieldset className="border p-3 rounded-md space-y-2">
+                        <legend className="text-sm font-medium text-gray-700 px-1">Phone Numbers *</legend>
+                        {formData.phones?.map((phoneItem, index) => (
+                            <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                <div className="col-span-2">
+                                    <label htmlFor={`edit-phone-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
+                                    <input
+                                        type="text"
+                                        id={`edit-phone-label-${index}`}
+                                        value={phoneItem.label || ''}
+                                        onChange={(e) => handleNestedChange(e, 'phones', index, 'label')}
+                                        className="mt-1 w-full input-style-sm"
+                                        placeholder="e.g., Mobile"
+                                    />
+                                </div>
+                                <div className="col-span-3">
+                                    <label htmlFor={`edit-phone-value-${index}`} className="text-xs font-medium text-gray-600">Phone Number</label>
+                                    <input
+                                        type="tel"
+                                        id={`edit-phone-value-${index}`}
+                                        value={phoneItem.phoneNumber || ''}
+                                        onChange={(e) => handleNestedChange(e, 'phones', index, 'phoneNumber')}
+                                        className="mt-1 w-full input-style-sm"
+                                        placeholder="+92..."
+                                        required={index === 0}
+                                    />
+                                </div>
+                                <div className="col-span-1">
+                                    {formData.phones.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveItem('phones', index)}
+                                            className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none"
+                                            aria-label={`Remove phone ${index + 1}`}
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={() => handleAddItem('phones')}
+                            className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
+                        >
+                            + Add Phone
+                        </button>
+                    </fieldset>
 
-                     {/* Modal Actions */}
-                     <div className="pt-4 flex justify-end space-x-2 border-t mt-4">
-                         <button type="button" onClick={onCancel} disabled={isSaving} className="... px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">Cancel</button>
-                         <button type="submit" disabled={isSaving} className="... px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1">
-                              {/* Saving indicator */}
-                             {isSaving ? 'Saving...' : 'Save Changes'}
-                         </button>
-                     </div>
-                 </form>
-             </div>
-             {/* Simple input style definition for reuse */}
-             <style jsx>{`
+                    <div className="pt-4 flex justify-end space-x-2 border-t mt-4">
+                        <button type="button" onClick={onCancel} disabled={isSaving} className="... px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">Cancel</button>
+                        <button type="submit" disabled={isSaving} className="... px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1">
+                            {isSaving ? 'Saving...' : 'Save Changes'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <style jsx>{`
                 .input-style {
                     margin-top: 0.25rem;
                     width: 100%;
@@ -296,8 +277,8 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
                      border-color: #6366F1; /* border-indigo-500 */
                  }
             `}</style>
-         </div>
-     );
- }
+        </div>
+    );
+}
 
- export default EditContactModal;
+export default EditContactModal;

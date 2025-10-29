@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EditContactModal from './EditContactModal';
 import DeleteConfirmModal from './DeleteConfirmationModal';
 
-const API_BASE_URL = 'http://localhost:8080/api/contacts'; // Or your actual backend URL
+const API_BASE_URL = 'http://localhost:8080/api/contacts';
 
 function ContactListPage({ token, username, onLogout }) {
     const [contacts, setContacts] = useState([]);
@@ -14,14 +14,12 @@ function ContactListPage({ token, username, onLogout }) {
     const [isLastPage, setIsLastPage] = useState(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
-    // --- State for Edit/Delete ---
     const [editingContact, setEditingContact] = useState(null);
     const [actionError, setActionError] = useState('');
     const [isProcessingAction, setIsProcessingAction] = useState(false);
 
     const [deletingContact, setDeletingContact] = useState(null);
 
-    // --- Debounce Effect ---
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm);
@@ -30,7 +28,6 @@ function ContactListPage({ token, username, onLogout }) {
         return () => clearTimeout(handler);
     }, [searchTerm]);
 
-    // --- Fetch Contacts Function ---
     const fetchContacts = async (currentPage = 0, currentSearch = '') => {
         setLoadingContacts(true);
         setContactsError('');
@@ -60,18 +57,14 @@ function ContactListPage({ token, username, onLogout }) {
         }
     };
 
-    // --- Fetch Effect ---
     useEffect(() => {
         if (token) fetchContacts(page, debouncedSearchTerm);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, debouncedSearchTerm, page, size, onLogout]);
 
-    // --- Handlers ---
     const handleSearchChange = (event) => setSearchTerm(event.target.value);
     const handleNextPage = () => { if (!isLastPage) setPage(p => p + 1); };
     const handlePrevPage = () => setPage(p => Math.max(0, p - 1));
 
-    // --- Edit and Delete Handlers ---
     const handleEditClick = (contact) => {
         setActionError('');
         setEditingContact(contact);
@@ -83,24 +76,24 @@ function ContactListPage({ token, username, onLogout }) {
     };
 
     const handleUpdateContact = (updatedContact) => {
-        fetchContacts(page, debouncedSearchTerm); // Refetch list after update
+        fetchContacts(page, debouncedSearchTerm);
         setEditingContact(null);
         setActionError('');
     };
 
     const handleDeleteClick = (contact) => {
         setActionError('');
-        setDeletingContact({ id: contact.id, name: `${contact.firstName} ${contact.lastName}`.trim() }); // Store ID and name
+        setDeletingContact({ id: contact.id, name: `${contact.firstName} ${contact.lastName}`.trim() });
     };
 
     const handleDeleteCancel = () => {
-        setDeletingContact(null); // Close the modal
+        setDeletingContact(null);
         setActionError('');
     };
 
     const handleConfirmDelete = async () => {
 
-        if (!deletingContact) return; // Should not happen, but safety check
+        if (!deletingContact) return;
 
         setIsProcessingAction(true);
         setActionError('');
@@ -123,24 +116,21 @@ function ContactListPage({ token, username, onLogout }) {
                 throw new Error(errorMsg);
             }
             console.log(`Contact ID: ${contactIdToDelete} deleted successfully.`);
-            setDeletingContact(null); // Close modal on success
-            // Refresh list logic
-            if (contacts.length === 1 && page > 0) { setPage(p => p - 1); } // Go back a page if it was the last item
-            else { fetchContacts(page, debouncedSearchTerm); } // Otherwise, refetch current page
+            setDeletingContact(null);
+            if (contacts.length === 1 && page > 0) { setPage(p => p - 1); }
+            else { fetchContacts(page, debouncedSearchTerm); }
         } catch (err) {
             console.error("Error deleting contact:", err);
             setActionError(err.message || 'Could not delete contact.');
-            setDeletingContact(null); // Close modal even on error, error is displayed above table
+            setDeletingContact(null);
             if (err.message.includes('Session expired')) onLogout();
         } finally {
             setIsProcessingAction(false);
         }
     };
-    // ------------------------------------
 
     return (
         <div className="w-full max-w-4xl bg-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col border border-gray-200" style={{ minHeight: '600px' }}>
-            {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-200 pb-4 gap-4">
                 <h2 className="text-xl md:text-2xl font-semibold text-gray-700">Your Contacts</h2>
                 <div className="flex items-center space-x-3 md:space-x-4">
@@ -154,7 +144,6 @@ function ContactListPage({ token, username, onLogout }) {
                 </div>
             </div>
 
-            {/* Search */}
             <div className="mb-4">
                 <label htmlFor="search-contacts" className="sr-only">Search Contacts</label>
                 <input
@@ -167,10 +156,8 @@ function ContactListPage({ token, username, onLogout }) {
                 />
             </div>
 
-            {/* Action Error Display */}
             {actionError && <p className="mb-3 text-center text-red-500 bg-red-100 p-3 rounded-md border border-red-200">{actionError}</p>}
 
-            {/* Loading/Error State for list */}
             {loadingContacts && (
                 <div className="flex justify-center items-center h-40">
                     <svg className="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -182,8 +169,6 @@ function ContactListPage({ token, username, onLogout }) {
             )}
             {contactsError && <p className="text-center text-red-500 bg-red-100 p-3 rounded-md border border-red-200">{contactsError}</p>}
 
-
-            {/* Contact List Table */}
             {!loadingContacts && !contactsError && (
                 <div className="flex-grow overflow-auto mb-4 border border-gray-200 rounded-lg">
                     {contacts.length === 0 ? (
@@ -240,7 +225,6 @@ function ContactListPage({ token, username, onLogout }) {
                 </div>
             )}
 
-            {/* Pagination */}
             {!loadingContacts && !contactsError && (contacts.length > 0 || page > 0) && (
                 <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                     <button onClick={handlePrevPage} disabled={page === 0 || loadingContacts} className={`px-4 py-1.5 rounded-md text-sm font-medium transition duration-150 ${page === 0 || loadingContacts ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1'}`}>Previous</button>
@@ -249,14 +233,12 @@ function ContactListPage({ token, username, onLogout }) {
                 </div>
             )}
 
-            {/* Add Contact Button */}
             {!loadingContacts && token && (
                 <div className="mt-6 text-center">
                     <button className="px-6 py-2 rounded-md font-semibold bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150">Add New Contact</button>
                 </div>
             )}
 
-            {/* Edit Modal */}
             {editingContact && (
                 <EditContactModal
                     contact={editingContact}
@@ -266,12 +248,11 @@ function ContactListPage({ token, username, onLogout }) {
                 />
             )}
 
-            {/* Delete Modal */}
             <DeleteConfirmModal
-                isOpen={!!deletingContact} // Open if deletingContact is not null
+                isOpen={!!deletingContact}
                 onCancel={handleDeleteCancel}
                 onConfirm={handleConfirmDelete}
-                contactName={deletingContact?.name} // Pass the name to display
+                contactName={deletingContact?.name}
                 isProcessing={isProcessingAction}
             />
         </div>

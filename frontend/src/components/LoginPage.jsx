@@ -47,8 +47,7 @@ function LoginPage({ onLogin, switchToRegister, error, loading }) {
                 <button
                     type="submit"
                     disabled={loading || !identifier || !password}
-                    className={`w-full py-2 px-4 rounded-md text-white font-semibold transition duration-150 ${
-                        loading || !identifier || !password ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+                    className={`w-full py-2 px-4 rounded-md text-white font-semibold transition duration-150 ${loading || !identifier || !password ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
                         }`}
                 >
                     {loading ? (
