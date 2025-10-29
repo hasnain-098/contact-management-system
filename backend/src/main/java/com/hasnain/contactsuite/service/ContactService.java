@@ -43,7 +43,7 @@ public class ContactService {
 
         if (StringUtils.hasText(searchTerm)) {
             log.debug("Performing search for term: '{}'", searchTerm);
-            contactPage = contactRepository.findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
+            contactPage = contactRepository.findByUserAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
                     user, searchTerm, searchTerm, pageable);
         } else {
             log.debug("No search term provided, fetching all contacts for page.");
