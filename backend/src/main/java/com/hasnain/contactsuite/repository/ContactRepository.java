@@ -10,6 +10,6 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
 
     Page<Contact> findByUser(User user, Pageable pageable);
     boolean existsByUserAndFirstNameAndLastName(User user, String firstName, String lastName);
-    Page<Contact> findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
-            User user, String searchTerm, String searchTerm2, Pageable pageable);
+    Page<Contact> findByUserAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
+            User user, String firstNameSearchTerm, String lastNameSearchTerm2, Pageable pageable);
 }
