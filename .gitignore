@@ -1,0 +1,71 @@
+# --- General ---
+.DS_Store
+Thumbs.db
+*.iml
+*.log
+logs/
+
+# --- IDE Files ---
+# IntelliJ
+.idea/
+*.iws
+
+# VS Code
+.vscode/
+
+# --- Environment Files ---
+# Avoid committing local environment variables
+.env
+.env*
+!*.env.example # Allow example env files
+
+# --- Backend (Maven / Spring Boot in 'backend' folder) ---
+backend/target/
+backend/pom.xml.tag
+backend/pom.xml.releaseBackup
+backend/pom.xml.versionsBackup
+backend/pom.xml.next
+backend/release.properties
+backend/dependency-reduced-pom.xml
+backend/buildNumber.properties
+backend/.mvn/timing.properties
+backend/.mvn/wrapper/maven-wrapper.jar
+# Don't commit production secrets if using profiles
+backend/src/main/resources/application-prod.properties
+backend/src/main/resources/application-staging.properties
+
+# --- Frontend (Node / Vite / React in 'frontend' folder) ---
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.output/
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/coverage/
+frontend/.vite/
+frontend/.nuxt/ # If using Nuxt
+
+# --- Other common ignores ---
+# Compiled class files
+*.class
+
+# Jar files
+*.jar
+*.war
+*.ear
+
+# Package Files #
+*.zip
+*.tar.gz
+*.rar
+
+# SQLite Databases
+*.sqlite3
+*.db
+
+# Virtual Environment Folders (Python, if used elsewhere)
+venv/
+env/
