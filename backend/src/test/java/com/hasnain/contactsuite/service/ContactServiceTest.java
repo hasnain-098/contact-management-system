@@ -160,7 +160,7 @@ public class ContactServiceTest {
         assertEquals("Another", result.get(1).getFirstName());
 
         verify(contactRepository).findByUser(testUserEmail, pageable);
-        verify(contactRepository, never()).findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
+        verify(contactRepository, never()).findByUserAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
                 any(), any(), any(), any());
     }
 
@@ -185,7 +185,7 @@ public class ContactServiceTest {
         assertEquals("Test", result.get(0).getFirstName());
 
         verify(contactRepository).findByUser(testUserPhone, pageable);
-        verify(contactRepository, never()).findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
+        verify(contactRepository, never()).findByUserAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
                 any(), any(), any(), any());
     }
 
@@ -197,7 +197,7 @@ public class ContactServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         when(userService.loadUserByUsername(TEST_EMAIL)).thenReturn(testSecurityUserEmail);
-        when(contactRepository.findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
+        when(contactRepository.findByUserAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
                 testUserEmail, searchTerm, searchTerm, pageable)).thenReturn(filteredPage);
         contactMapperMockedStatic.when(() -> ContactMapper.toDTO(testContact)).thenReturn(testContactDTO);
 
@@ -207,7 +207,7 @@ public class ContactServiceTest {
         assertEquals(1, result.size());
         assertEquals("Test", result.get(0).getFirstName());
 
-        verify(contactRepository).findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
+        verify(contactRepository).findByUserAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
                 testUserEmail, searchTerm, searchTerm, pageable);
         verify(contactRepository, never()).findByUser(any(), any());
     }
@@ -227,7 +227,7 @@ public class ContactServiceTest {
         assertTrue(result.isEmpty());
 
         verify(contactRepository).findByUser(testUserEmail, pageable);
-        verify(contactRepository, never()).findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
+        verify(contactRepository, never()).findByUserAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
                 any(), any(), any(), any());
     }
 
@@ -239,7 +239,7 @@ public class ContactServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         when(userService.loadUserByUsername(TEST_EMAIL)).thenReturn(testSecurityUserEmail);
-        when(contactRepository.findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
+        when(contactRepository.findByUserAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
                 testUserEmail, searchTerm, searchTerm, pageable)).thenReturn(emptyPage);
 
         List<ContactDTO> result = contactService.getUserContacts(TEST_EMAIL, searchTerm, 0, 10);
@@ -247,7 +247,7 @@ public class ContactServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
-        verify(contactRepository).findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
+        verify(contactRepository).findByUserAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
                 testUserEmail, searchTerm, searchTerm, pageable);
         verify(contactRepository, never()).findByUser(any(), any());
     }
