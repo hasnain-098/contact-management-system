@@ -61,8 +61,8 @@ function CreateContactModal({ token, onSave, onCancel }) {
     };
 
     const validateForm = (data) => {
-        if (!data.firstName || !data.lastName) {
-            return 'First Name and Last Name are required.';
+        if (!data.firstName) {
+            return 'First Name is required.';
         }
 
         const validEmails = data.emails.filter(e => e.email.trim());
@@ -135,153 +135,155 @@ function CreateContactModal({ token, onSave, onCancel }) {
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
-            <div className="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div className="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white flex flex-col max-h-[90vh]">
                 <h3 className="text-xl font-semibold leading-6 text-gray-900 mb-4 border-b pb-2">Create New Contact</h3>
-
                 {error && <p className="text-red-500 text-sm mb-3 bg-red-100 p-2 rounded-md border border-red-200">{error}</p>}
 
-                <form onSubmit={handleSubmit} className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
+                <div className="flex-grow overflow-y-auto pr-2 pb-4">
+                    <form id="create-contact-form" onSubmit={handleSubmit} className="space-y-3">
 
-                    <div>
-                        <label htmlFor="create-firstName" className="text-sm font-medium text-gray-700">First Name *</label>
-                        <input type="text" id="create-firstName" name="firstName" value={formData.firstName || ''} onChange={handleChange} required className="mt-1 w-full input-style" disabled={isProcessing} />
-                    </div>
-                    <div>
-                        <label htmlFor="create-lastName" className="text-sm font-medium text-gray-700">Last Name</label>
-                        <input type="text" id="create-lastName" name="lastName" value={formData.lastName || ''} onChange={handleChange} className="mt-1 w-full input-style" disabled={isProcessing} />
-                    </div>
-                    <div>
-                        <label htmlFor="create-title" className="text-sm font-medium text-gray-700">Title</label>
-                        <input type="text" id="create-title" name="title" value={formData.title || ''} onChange={handleChange} className="mt-1 w-full input-style" disabled={isProcessing} />
-                    </div>
+                        <div>
+                            <label htmlFor="create-firstName" className="text-sm font-medium text-gray-700">First Name *</label>
+                            <input type="text" id="create-firstName" name="firstName" value={formData.firstName || ''} onChange={handleChange} required className="mt-1 w-full input-style" disabled={isProcessing} />
+                        </div>
+                        <div>
+                            <label htmlFor="create-lastName" className="text-sm font-medium text-gray-700">Last Name</label>
+                            <input type="text" id="create-lastName" name="lastName" value={formData.lastName || ''} onChange={handleChange} className="mt-1 w-full input-style" disabled={isProcessing} />
+                        </div>
+                        <div>
+                            <label htmlFor="create-title" className="text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" id="create-title" name="title" value={formData.title || ''} onChange={handleChange} className="mt-1 w-full input-style" disabled={isProcessing} />
+                        </div>
 
-                    <fieldset className="border p-3 rounded-md space-y-2">
-                        <legend className="text-sm font-medium text-gray-700 px-1">Emails *</legend>
-                        {formData.emails?.map((emailItem, index) => (
-                            <div key={index} className="grid grid-cols-6 gap-2 items-end">
-                                <div className="col-span-2">
-                                    <label htmlFor={`create-email-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
-                                    <input
-                                        type="text"
-                                        id={`create-email-label-${index}`}
-                                        value={emailItem.label || ''}
-                                        onChange={(e) => handleNestedChange(e, 'emails', index, 'label')}
-                                        className="mt-1 w-full input-style-sm"
-                                        placeholder="e.g., Work"
-                                        disabled={isProcessing}
-                                    />
-                                </div>
-                                <div className="col-span-3">
-                                    <label htmlFor={`create-email-value-${index}`} className="text-xs font-medium text-gray-600">Email Address</label>
-                                    <input
-                                        type="email"
-                                        id={`create-email-value-${index}`}
-                                        value={emailItem.email || ''}
-                                        onChange={(e) => handleNestedChange(e, 'emails', index, 'email')}
-                                        className="mt-1 w-full input-style-sm"
-                                        placeholder="name@example.com"
-                                        disabled={isProcessing}
-                                    />
-                                </div>
-                                <div className="col-span-1">
-                                    {formData.emails.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveItem('emails', index)}
-                                            className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none disabled:opacity-50"
-                                            aria-label={`Remove email ${index + 1}`}
+                        <fieldset className="border p-3 rounded-md space-y-2">
+                            <legend className="text-sm font-medium text-gray-700 px-1">Emails *</legend>
+                            {formData.emails?.map((emailItem, index) => (
+                                <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                    <div className="col-span-2">
+                                        <label htmlFor={`create-email-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
+                                        <input
+                                            type="text"
+                                            id={`create-email-label-${index}`}
+                                            value={emailItem.label || ''}
+                                            onChange={(e) => handleNestedChange(e, 'emails', index, 'label')}
+                                            className="mt-1 w-full input-style-sm"
+                                            placeholder="e.g., Work"
                                             disabled={isProcessing}
-                                        >
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={() => handleAddItem('emails')}
-                            className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1 transition duration-150 disabled:opacity-50"
-                            disabled={isProcessing}
-                        >
-                            + Add Email
-                        </button>
-                    </fieldset>
-
-                    <fieldset className="border p-3 rounded-md space-y-2">
-                        <legend className="text-sm font-medium text-gray-700 px-1">Phone Numbers *</legend>
-                        {formData.phones?.map((phoneItem, index) => (
-                            <div key={index} className="grid grid-cols-6 gap-2 items-end">
-                                <div className="col-span-2">
-                                    <label htmlFor={`create-phone-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
-                                    <input
-                                        type="text"
-                                        id={`create-phone-label-${index}`}
-                                        value={phoneItem.label || ''}
-                                        onChange={(e) => handleNestedChange(e, 'phones', index, 'label')}
-                                        className="mt-1 w-full input-style-sm"
-                                        placeholder="e.g., Mobile"
-                                        disabled={isProcessing}
-                                    />
-                                </div>
-                                <div className="col-span-3">
-                                    <label htmlFor={`create-phone-value-${index}`} className="text-xs font-medium text-gray-600">Phone Number</label>
-                                    <input
-                                        type="tel"
-                                        id={`create-phone-value-${index}`}
-                                        value={phoneItem.phoneNumber || ''}
-                                        onChange={(e) => handleNestedChange(e, 'phones', index, 'phoneNumber')}
-                                        className="mt-1 w-full input-style-sm"
-                                        placeholder="+92..."
-                                        disabled={isProcessing}
-                                    />
-                                </div>
-                                <div className="col-span-1">
-                                    {formData.phones.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveItem('phones', index)}
-                                            className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none disabled:opacity-50"
-                                            aria-label={`Remove phone ${index + 1}`}
+                                        />
+                                    </div>
+                                    <div className="col-span-3">
+                                        <label htmlFor={`create-email-value-${index}`} className="text-xs font-medium text-gray-600">Email Address</label>
+                                        <input
+                                            type="email"
+                                            id={`create-email-value-${index}`}
+                                            value={emailItem.email || ''}
+                                            onChange={(e) => handleNestedChange(e, 'emails', index, 'email')}
+                                            className="mt-1 w-full input-style-sm"
+                                            placeholder="name@example.com"
                                             disabled={isProcessing}
-                                        >
-                                            Remove
-                                        </button>
-                                    )}
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        {formData.emails.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveItem('emails', index)}
+                                                className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none disabled:opacity-50"
+                                                aria-label={`Remove email ${index + 1}`}
+                                                disabled={isProcessing}
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={() => handleAddItem('phones')}
-                            className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1 transition duration-150 disabled:opacity-50"
-                            disabled={isProcessing}
-                        >
-                            + Add Phone
-                        </button>
-                    </fieldset>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => handleAddItem('emails')}
+                                className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1 transition duration-150 disabled:opacity-50"
+                                disabled={isProcessing}
+                            >
+                                + Add Email
+                            </button>
+                        </fieldset>
 
-                    <div className="pt-4 flex justify-end space-x-3 border-t mt-4">
-                        <button
-                            type="button"
-                            onClick={onCancel}
-                            disabled={isProcessing}
-                            className="px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isProcessing}
-                            className="px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isProcessing ? 'Creating...' : 'Create Contact'}
-                        </button>
-                    </div>
-                </form>
+                        <fieldset className="border p-3 rounded-md space-y-2">
+                            <legend className="text-sm font-medium text-gray-700 px-1">Phone Numbers *</legend>
+                            {formData.phones?.map((phoneItem, index) => (
+                                <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                    <div className="col-span-2">
+                                        <label htmlFor={`create-phone-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
+                                        <input
+                                            type="text"
+                                            id={`create-phone-label-${index}`}
+                                            value={phoneItem.label || ''}
+                                            onChange={(e) => handleNestedChange(e, 'phones', index, 'label')}
+                                            className="mt-1 w-full input-style-sm"
+                                            placeholder="e.g., Mobile"
+                                            disabled={isProcessing}
+                                        />
+                                    </div>
+                                    <div className="col-span-3">
+                                        <label htmlFor={`create-phone-value-${index}`} className="text-xs font-medium text-gray-600">Phone Number</label>
+                                        <input
+                                            type="tel"
+                                            id={`create-phone-value-${index}`}
+                                            value={phoneItem.phoneNumber || ''}
+                                            onChange={(e) => handleNestedChange(e, 'phones', index, 'phoneNumber')}
+                                            className="mt-1 w-full input-style-sm"
+                                            placeholder="+92..."
+                                            disabled={isProcessing}
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        {formData.phones.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveItem('phones', index)}
+                                                className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none disabled:opacity-50"
+                                                aria-label={`Remove phone ${index + 1}`}
+                                                disabled={isProcessing}
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => handleAddItem('phones')}
+                                className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1 transition duration-150 disabled:opacity-50"
+                                disabled={isProcessing}
+                            >
+                                + Add Phone
+                            </button>
+                        </fieldset>
+                    </form>
+                </div>
+
+                <div className="flex-shrink-0 pt-4 flex justify-end space-x-3 border-t mt-4">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        disabled={isProcessing}
+                        className="px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        form="create-contact-form"
+                        disabled={isProcessing}
+                        className="px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isProcessing ? 'Creating...' : 'Create Contact'}
+                    </button>
+                </div>
             </div>
 
-            <style jsx>{`
+            <style>{`
                 .input-style {
                     margin-top: 0.25rem;
                     width: 100%;

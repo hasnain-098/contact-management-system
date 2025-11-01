@@ -111,132 +111,143 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
-            <div className="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
-                <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Edit Contact</h3>
+            <div className="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white flex flex-col max-h-[90vh]">
+                <h3 className="text-xl font-semibold leading-6 text-gray-900 mb-4 border-b pb-2">Edit Contact</h3>
                 {error && <p className="text-red-500 text-sm mb-3 bg-red-100 p-2 rounded-md border border-red-200">{error}</p>}
-                <form onSubmit={handleSubmit} className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
-                    <div>
-                        <label htmlFor="edit-firstName" className="text-sm font-medium text-gray-700">First Name *</label>
-                        <input type="text" id="edit-firstName" name="firstName" value={formData.firstName || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
-                    </div>
-                    <div>
-                        <label htmlFor="edit-lastName" className="text-sm font-medium text-gray-700">Last Name</label>
-                        <input type="text" id="edit-lastName" name="lastName" value={formData.lastName || ''} onChange={handleChange} className="mt-1 w-full input-style" />
-                    </div>
-                    <div>
-                        <label htmlFor="edit-title" className="text-sm font-medium text-gray-700">Title *</label>
-                        <input type="text" id="edit-title" name="title" value={formData.title || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
-                    </div>
+                <div className="flex-grow overflow-y-auto pr-2 pb-4">
+                    <form id="edit-contact-form" onSubmit={handleSubmit} className="space-y-3">
+                        <div>
+                            <label htmlFor="edit-firstName" className="text-sm font-medium text-gray-700">First Name *</label>
+                            <input type="text" id="edit-firstName" name="firstName" value={formData.firstName || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
+                        </div>
+                        <div>
+                            <label htmlFor="edit-lastName" className="text-sm font-medium text-gray-700">Last Name</label>
+                            <input type="text" id="edit-lastName" name="lastName" value={formData.lastName || ''} onChange={handleChange} className="mt-1 w-full input-style" />
+                        </div>
+                        <div>
+                            <label htmlFor="edit-title" className="text-sm font-medium text-gray-700">Title *</label>
+                            <input type="text" id="edit-title" name="title" value={formData.title || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
+                        </div>
 
-                    <fieldset className="border p-3 rounded-md space-y-2">
-                        <legend className="text-sm font-medium text-gray-700 px-1">Emails *</legend>
-                        {formData.emails?.map((emailItem, index) => (
-                            <div key={index} className="grid grid-cols-6 gap-2 items-end">
-                                <div className="col-span-2">
-                                    <label htmlFor={`edit-email-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
-                                    <input
-                                        type="text"
-                                        id={`edit-email-label-${index}`}
-                                        value={emailItem.label || ''}
-                                        onChange={(e) => handleNestedChange(e, 'emails', index, 'label')}
-                                        className="mt-1 w-full input-style-sm"
-                                        placeholder="e.g., Work"
-                                    />
+                        <fieldset className="border p-3 rounded-md space-y-2">
+                            <legend className="text-sm font-medium text-gray-700 px-1">Emails *</legend>
+                            {formData.emails?.map((emailItem, index) => (
+                                <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                    <div className="col-span-2">
+                                        <label htmlFor={`edit-email-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
+                                        <input
+                                            type="text"
+                                            id={`edit-email-label-${index}`}
+                                            value={emailItem.label || ''}
+                                            onChange={(e) => handleNestedChange(e, 'emails', index, 'label')}
+                                            className="mt-1 w-full input-style-sm"
+                                            placeholder="e.g., Work"
+                                        />
+                                    </div>
+                                    <div className="col-span-3">
+                                        <label htmlFor={`edit-email-value-${index}`} className="text-xs font-medium text-gray-600">Email Address</label>
+                                        <input
+                                            type="email"
+                                            id={`edit-email-value-${index}`}
+                                            value={emailItem.email || ''}
+                                            onChange={(e) => handleNestedChange(e, 'emails', index, 'email')}
+                                            className="mt-1 w-full input-style-sm"
+                                            placeholder="name@example.com"
+                                            required={index === 0}
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        {formData.emails.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveItem('emails', index)}
+                                                className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none"
+                                                aria-label={`Remove email ${index + 1}`}
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="col-span-3">
-                                    <label htmlFor={`edit-email-value-${index}`} className="text-xs font-medium text-gray-600">Email Address</label>
-                                    <input
-                                        type="email"
-                                        id={`edit-email-value-${index}`}
-                                        value={emailItem.email || ''}
-                                        onChange={(e) => handleNestedChange(e, 'emails', index, 'email')}
-                                        className="mt-1 w-full input-style-sm"
-                                        placeholder="name@example.com"
-                                        required={index === 0}
-                                    />
-                                </div>
-                                <div className="col-span-1">
-                                    {formData.emails.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveItem('emails', index)}
-                                            className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none"
-                                            aria-label={`Remove email ${index + 1}`}
-                                        >
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={() => handleAddItem('emails')}
-                            className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
-                        >
-                            + Add Email
-                        </button>
-                    </fieldset>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => handleAddItem('emails')}
+                                className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
+                            >
+                                + Add Email
+                            </button>
+                        </fieldset>
 
-                    <fieldset className="border p-3 rounded-md space-y-2">
-                        <legend className="text-sm font-medium text-gray-700 px-1">Phone Numbers *</legend>
-                        {formData.phones?.map((phoneItem, index) => (
-                            <div key={index} className="grid grid-cols-6 gap-2 items-end">
-                                <div className="col-span-2">
-                                    <label htmlFor={`edit-phone-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
-                                    <input
-                                        type="text"
-                                        id={`edit-phone-label-${index}`}
-                                        value={phoneItem.label || ''}
-                                        onChange={(e) => handleNestedChange(e, 'phones', index, 'label')}
-                                        className="mt-1 w-full input-style-sm"
-                                        placeholder="e.g., Mobile"
-                                    />
+                        <fieldset className="border p-3 rounded-md space-y-2">
+                            <legend className="text-sm font-medium text-gray-700 px-1">Phone Numbers *</legend>
+                            {formData.phones?.map((phoneItem, index) => (
+                                <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                    <div className="col-span-2">
+                                        <label htmlFor={`edit-phone-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
+                                        <input
+                                            type="text"
+                                            id={`edit-phone-label-${index}`}
+                                            value={phoneItem.label || ''}
+                                            onChange={(e) => handleNestedChange(e, 'phones', index, 'label')}
+                                            className="mt-1 w-full input-style-sm"
+                                            placeholder="e.g., Mobile"
+                                        />
+                                    </div>
+                                    <div className="col-span-3">
+                                        <label htmlFor={`edit-phone-value-${index}`} className="text-xs font-medium text-gray-600">Phone Number</label>
+                                        <input
+                                            type="tel"
+                                            id={`edit-phone-value-${index}`}
+                                            value={phoneItem.phoneNumber || ''}
+                                            onChange={(e) => handleNestedChange(e, 'phones', index, 'phoneNumber')}
+                                            className="mt-1 w-full input-style-sm"
+                                            placeholder="+92..."
+                                            required={index === 0}
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        {formData.phones.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveItem('phones', index)}
+                                                className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none"
+                                                aria-label={`Remove phone ${index + 1}`}
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="col-span-3">
-                                    <label htmlFor={`edit-phone-value-${index}`} className="text-xs font-medium text-gray-600">Phone Number</label>
-                                    <input
-                                        type="tel"
-                                        id={`edit-phone-value-${index}`}
-                                        value={phoneItem.phoneNumber || ''}
-                                        onChange={(e) => handleNestedChange(e, 'phones', index, 'phoneNumber')}
-                                        className="mt-1 w-full input-style-sm"
-                                        placeholder="+92..."
-                                        required={index === 0}
-                                    />
-                                </div>
-                                <div className="col-span-1">
-                                    {formData.phones.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveItem('phones', index)}
-                                            className="px-2 py-1.5 text-xs text-red-600 hover:text-red-800 focus:outline-none"
-                                            aria-label={`Remove phone ${index + 1}`}
-                                        >
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={() => handleAddItem('phones')}
-                            className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
-                        >
-                            + Add Phone
-                        </button>
-                    </fieldset>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => handleAddItem('phones')}
+                                className="mt-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
+                            >
+                                + Add Phone
+                            </button>
+                        </fieldset>
+                    </form>
+                </div>
 
-                    <div className="pt-4 flex justify-end space-x-2 border-t mt-4">
-                        <button type="button" onClick={onCancel} disabled={isSaving} className="... px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">Cancel</button>
-                        <button type="submit" disabled={isSaving} className="... px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1">
-                            {isSaving ? 'Saving...' : 'Save Changes'}
-                        </button>
-                    </div>
-                </form>
+                <div className="flex-shrink-0 pt-4 flex justify-end space-x-3 border-t mt-4">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        disabled={isSaving}
+                        className="px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700">Cancel</button>
+                    <button
+                        type="submit"
+                        disabled={isSaving}
+                        form="edit-contact-form"
+                        className="px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700">
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                </div>
             </div>
-            <style jsx>{`
+
+            <style>{`
                 .input-style {
                     margin-top: 0.25rem;
                     width: 100%;
