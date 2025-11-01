@@ -23,8 +23,8 @@ function App() {
 
     useEffect(() => {
         if (token && username) {
-            localStorage.getItem('authToken', token);
-            localStorage.getItem('username', username);
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('username', username);
             setView('contacts');
         } else {
             localStorage.removeItem('authToken');
