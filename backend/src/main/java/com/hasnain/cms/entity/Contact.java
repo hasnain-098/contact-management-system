@@ -37,11 +37,12 @@ public class Contact {
     @PrePersist
     @PreUpdate
     private void validateContactDetails() {
-        if (emails == null || emails.isEmpty()) {
-            throw new IllegalStateException("A contact must have at least one email address");
-        }
-        if (phones == null || phones.isEmpty()) {
-            throw new IllegalStateException("A contact must have at least one phone number");
+
+        boolean hasEmails = emails != null && !emails.isEmpty();
+        boolean hasPhones = phones != null && !phones.isEmpty();
+
+        if (!hasEmails || !hasPhones) {
+            throw new IllegalStateException("A contact must have at least one email or one phone number.");
         }
     }
 
