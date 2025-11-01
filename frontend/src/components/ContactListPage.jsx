@@ -4,7 +4,7 @@ import DeleteConfirmModal from './DeleteConfirmationModal';
 import CreateContactModal from './CreateContactModal';
 import UserProfileModal from './UserProfileModal';
 import ChangePasswordModal from './ChangePasswordModal';
-import { formatDisplayName } from '../utils/formatting';
+import { formatDisplayName } from '../utils/Formatting';
 import { ProfileIcon, Spinner } from '../utils/Icons';
 
 const API_BASE_URL = 'http://localhost:8080/api/contacts';
