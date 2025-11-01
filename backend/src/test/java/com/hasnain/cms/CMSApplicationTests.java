@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest
-class ContactSuiteApplicationTests {
+class CMSApplicationTests {
 
     @MockBean
     private UserRepository userRepository;
