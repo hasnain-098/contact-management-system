@@ -1,0 +1,22 @@
+package com.hasnain.cms.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ContactEmailDTO {
+
+    private Long id;
+
+    @NotBlank(message = "Email label is required")
+    private String label;
+
+    @NotBlank(message =  "Email address is required")
+    @Email(message = "Invalid email format")
+    private String email;
+}
