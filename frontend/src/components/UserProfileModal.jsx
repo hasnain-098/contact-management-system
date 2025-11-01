@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { formatDisplayName } from '../utils/formatting';
+import { formatDisplayName } from '../utils/Formatting';
 import { ProfileIcon } from '../utils/Icons';
 
 function UserProfileModal({ username, onLogout, onCancel, onChangePasswordClick }) {
