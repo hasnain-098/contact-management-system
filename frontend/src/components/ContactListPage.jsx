@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import EditContactModal from './EditContactModal';
 import DeleteConfirmModal from './DeleteConfirmationModal';
+import CreateContactModal from './CreateContactModal';
+import UserProfileModal from './UserProfileModal';
+import ChangePasswordModal from './ChangePasswordModal';
+import { formatDisplayName } from '../utils/formatting';
+import { ProfileIcon, Spinner } from '../utils/Icons';
 
 const API_BASE_URL = 'http://localhost:8080/api/contacts';
 
@@ -19,6 +24,11 @@ function ContactListPage({ token, username, onLogout }) {
     const [isProcessingAction, setIsProcessingAction] = useState(false);
 
     const [deletingContact, setDeletingContact] = useState(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
+    const displayName = formatDisplayName(username);
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -129,17 +139,59 @@ function ContactListPage({ token, username, onLogout }) {
         }
     };
 
+    const handleAddContactClick = () => {
+        setActionError('');
+        setIsCreateModalOpen(true);
+    };
+
+    const handleCreateContact = (newContact) => {
+        fetchContacts(0, debouncedSearchTerm);
+        setIsCreateModalOpen(false);
+        setActionError('Contact created successfully');
+    };
+
+    const handleCreateModalCancel = () => {
+        setIsCreateModalOpen(false);
+        setActionError('');
+    };
+
+    const handleProfileClick = () => {
+        setActionError('');
+        setIsProfileModalOpen(true);
+    };
+
+    const handleProfileModalCancel = () => {
+        setIsProfileModalOpen(false);
+    };
+
+    const handleOpenChangePassword = () => {
+        setIsProfileModalOpen(false);
+        setIsChangePasswordOpen(true);
+        setActionError('');
+    };
+
+    const handleChangePasswordSuccess = (message) => {
+        setIsChangePasswordOpen(false);
+        setActionError(message);
+    };
+
+    const handleCancelChangePassword = () => {
+        setIsChangePasswordOpen(false);
+        setActionError('');
+    };
+    
     return (
         <div className="w-full max-w-4xl bg-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col border border-gray-200" style={{ minHeight: '600px' }}>
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-200 pb-4 gap-4">
                 <h2 className="text-xl md:text-2xl font-semibold text-gray-700">Your Contacts</h2>
                 <div className="flex items-center space-x-3 md:space-x-4">
-                    <span className="text-sm text-gray-600 hidden sm:inline">Welcome, {username}!</span>
+                    <span className="text-sm font-semibold text-gray-700 hidden sm:inline">Welcome, {displayName}!</span>
                     <button
-                        onClick={onLogout}
-                        className="px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150"
+                        onClick={handleProfileClick}
+                        className="p-2 rounded-full text-indigo-600 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150"
+                        aria-label="User Profile and Logout"
                     >
-                        Logout
+                        <ProfileIcon className="w-5 h-5" />
                     </button>
                 </div>
             </div>
@@ -160,10 +212,7 @@ function ContactListPage({ token, username, onLogout }) {
 
             {loadingContacts && (
                 <div className="flex justify-center items-center h-40">
-                    <svg className="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <Spinner />
                     <span className="ml-3 text-gray-500">Loading contacts...</span>
                 </div>
             )}
@@ -235,7 +284,12 @@ function ContactListPage({ token, username, onLogout }) {
 
             {!loadingContacts && token && (
                 <div className="mt-6 text-center">
-                    <button className="px-6 py-2 rounded-md font-semibold bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150">Add New Contact</button>
+                    <button
+                        onClick={handleAddContactClick}
+                        className="px-6 py-2 rounded-md font-semibold bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150"
+                    >
+                        Add New Contact
+                    </button>
                 </div>
             )}
 
@@ -255,6 +309,33 @@ function ContactListPage({ token, username, onLogout }) {
                 contactName={deletingContact?.name}
                 isProcessing={isProcessingAction}
             />
+
+            {isCreateModalOpen && (
+                <CreateContactModal
+                    token={token}
+                    onSave={handleCreateContact}
+                    onCancel={handleCreateModalCancel}
+                />
+            )}
+
+            {isProfileModalOpen && (
+                <UserProfileModal
+                    username={username}
+                    onLogout={onLogout}
+                    onCancel={handleProfileModalCancel}
+                    token={token}
+                    onChangePasswordClick={handleOpenChangePassword}
+                />
+            )}
+
+            {isChangePasswordOpen && (
+                <ChangePasswordModal
+                    token={token}
+                    onSuccess={handleChangePasswordSuccess}
+                    onCancel={handleCancelChangePassword}
+                    onLogout={onLogout}
+                />
+            )}
         </div>
     );
 }
