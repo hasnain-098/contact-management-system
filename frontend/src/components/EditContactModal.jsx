@@ -44,35 +44,61 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
     };
 
     const handleRemoveItem = (type, index) => {
-        if (formData[type].length <= 1) {
-            setError(`At least one ${type === 'emails' ? 'email' : 'phone number'} is required.`);
-            return;
-        }
         setError('');
-        setFormData(prev => ({
-            ...prev,
-            [type]: prev[type].filter((_, i) => i !== index)
-        }));
+        setFormData(prev => {
+            const currentArray = prev[type];
+            return {
+                ...prev,
+                [type]: currentArray.filter((_, i) => i !== index)
+            }
+        });
+    };
+
+    const validateForm = (data) => {
+        if (!data.firstName) {
+            return 'First Name is required.';
+        }
+
+        const validEmails = data.emails.filter(e => e.email.trim());
+        const validPhones = data.phones.filter(p => p.phoneNumber.trim());
+
+        // 1. Check: Must have at least one valid email OR one valid phone (Matching the relaxed backend rule)
+        if (validEmails.length === 0 && validPhones.length === 0) {
+            return 'A contact must have at least one valid email or one valid phone number.';
+        }
+
+        if (validEmails.some(e => !isValidEmail(e.email))) {
+            return 'One or more email addresses are invalid.';
+        }
+
+        if (validPhones.some(p => !isValidPhoneNumber(p.phoneNumber))) {
+            return 'One or more phone numbers are invalid (e.g., must match +92-xxx-xxxxxxx or 03xxxxxxxxx).';
+        }
+
+        return null;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSaving(true);
         setError('');
-        console.log("Saving changes for contact:", formData.id, formData);
 
-        const validEmails = formData.emails.filter(e => e.email && e.email.trim() !== '');
-        const validPhones = formData.phones.filter(p => p.phoneNumber && p.phoneNumber.trim() !== '');
-
-        if (!formData.firstName || !formData.title || validEmails.length === 0 || validPhones.length === 0) {
-            setError('First Name, Title, at least one valid Email, and at least one valid Phone are required.');
+        const validationError = validateForm(formData);
+        if (validationError) {
+            setError(validationError);
             setIsSaving(false);
             return;
         }
 
-        const emailsToSend = validEmails.map(e => ({ label: e.label || '', email: e.email }));
-        const phonesToSend = validPhones.map(p => ({ label: p.label || '', phoneNumber: p.phoneNumber }));
+        console.log("Saving changes for contact:", formData.id, formData);
 
+        const emailsToSend = formData.emails
+            .filter(e => e.email.trim() !== '')
+            .map(e => ({ label: e.label || '', email: e.email }));
+        
+        const phonesToSend = formData.phones
+            .filter(p => p.phoneNumber && p.phoneNumber.trim() !== '')
+            .map(p => ({ label: p.label || '', phoneNumber: p.phoneNumber }));
 
         try {
             const response = await fetch(`${API_BASE_URL}/${formData.id}`, {
@@ -125,8 +151,8 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
                             <input type="text" id="edit-lastName" name="lastName" value={formData.lastName || ''} onChange={handleChange} className="mt-1 w-full input-style" />
                         </div>
                         <div>
-                            <label htmlFor="edit-title" className="text-sm font-medium text-gray-700">Title *</label>
-                            <input type="text" id="edit-title" name="title" value={formData.title || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
+                            <label htmlFor="edit-title" className="text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" id="edit-title" name="title" value={formData.title || ''} onChange={handleChange} className="mt-1 w-full input-style" />
                         </div>
 
                         <fieldset className="border p-3 rounded-md space-y-2">
@@ -157,7 +183,7 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
                                         />
                                     </div>
                                     <div className="col-span-1">
-                                        {formData.emails.length > 1 && (
+                                        {formData.emails.length >= 1 && (
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveItem('emails', index)}
@@ -207,7 +233,7 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
                                         />
                                     </div>
                                     <div className="col-span-1">
-                                        {formData.phones.length > 1 && (
+                                        {formData.phones.length >= 1 && (
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveItem('phones', index)}

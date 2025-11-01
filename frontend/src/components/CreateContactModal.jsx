@@ -52,10 +52,6 @@ function CreateContactModal({ token, onSave, onCancel }) {
         setError('');
         setFormData(prev => {
             const currentArray = prev[type];
-            if (currentArray.length <= 1) {
-                setError(`At least one ${type === 'emails' ? 'email' : 'phone number'} is required.`);
-                return prev;
-            }
             return { ...prev, [type]: currentArray.filter((_, i) => i !== index) };
         });
     };
@@ -68,8 +64,8 @@ function CreateContactModal({ token, onSave, onCancel }) {
         const validEmails = data.emails.filter(e => e.email.trim());
         const validPhones = data.phones.filter(p => p.phoneNumber.trim());
 
-        if (validEmails.length === 0 && validPhones.length === 0) {
-            return 'You must provide at least one email or one phone number.';
+        if (validEmails.length === 0 || validPhones.length === 0) {
+            return 'A contact must have at least one valid email or one valid phone number.';
         }
 
         if (validEmails.some(e => !isValidEmail(e.email))) {
@@ -77,7 +73,7 @@ function CreateContactModal({ token, onSave, onCancel }) {
         }
 
         if (validPhones.some(p => !isValidPhoneNumber(p.phoneNumber))) {
-            return 'One or more phone numbers are invalid (must be at least 6 characters).';
+            return 'One or more phone numbers are invalid (e.g., must match +92-xxx-xxxxxxx or 03xxxxxxxxx).';
         }
 
         return null;
@@ -184,7 +180,7 @@ function CreateContactModal({ token, onSave, onCancel }) {
                                         />
                                     </div>
                                     <div className="col-span-1">
-                                        {formData.emails.length > 1 && (
+                                        {formData.emails.length >= 1 && (
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveItem('emails', index)}
@@ -237,7 +233,7 @@ function CreateContactModal({ token, onSave, onCancel }) {
                                         />
                                     </div>
                                     <div className="col-span-1">
-                                        {formData.phones.length > 1 && (
+                                        {formData.phones.length >= 1 && (
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveItem('phones', index)}
