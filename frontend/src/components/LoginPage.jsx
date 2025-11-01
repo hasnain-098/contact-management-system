@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { EyeIcon, EyeOffIcon, Spinner } from "../utils/Icons";
 
 function LoginPage({ onLogin, switchToRegister, error, loading }) {
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -33,16 +35,27 @@ function LoginPage({ onLogin, switchToRegister, error, loading }) {
                     <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="login-password">
                         Password
                     </label>
-                    <input
-                        type="password"
-                        id="login-password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150"
-                        placeholder="••••••••"
-                        required
-                        aria-label="Password"
-                    />
+                    <div className="relative">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            id="login-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150"
+                            placeholder="••••••••"
+                            required
+                            aria-label="Password"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(prev => !prev)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-indigo-600 disabled:opacity-50"
+                            disabled={loading}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                            {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                        </button>
+                    </div>
                 </div>
                 <button
                     type="submit"
@@ -52,10 +65,7 @@ function LoginPage({ onLogin, switchToRegister, error, loading }) {
                 >
                     {loading ? (
                         <div className="flex justify-center items-center">
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+                            <Spinner />
                             Logging in...
                         </div>
                     ) : 'Login'}
