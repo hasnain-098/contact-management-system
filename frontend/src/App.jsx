@@ -114,7 +114,7 @@ function App() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 font-sans flex flex-col items-center justify-center p-4">
-            <h1 className="text-4xl font-bold text-indigo-700 mb-8 drop-shadow-md font-['Inter',_sans-serif]">Contact Management System</h1>
+            {!token && < h1 className="text-4xl font-bold text-indigo-700 mb-8 drop-shadow-md font-['Inter',_sans-serif]">Contact Management System</h1>}
 
             {!token ? (
                 view === 'login' ? (
