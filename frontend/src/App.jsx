@@ -105,11 +105,11 @@ function App() {
         }
     };
 
-    const handleLogout = () => {
+    const handleLogout = (message = '') => {
         console.log('Logging out');
         setToken(null);
         setUsername(null);
-        setError('');
+        setError(message);
     };
 
     return (
