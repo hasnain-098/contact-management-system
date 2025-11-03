@@ -69,3 +69,9 @@ frontend/.nuxt/ # If using Nuxt
 # Virtual Environment Folders (Python, if used elsewhere)
 venv/
 env/
+
+# target folder
+/target/
+
+# settings.xml file
+settings.xml
