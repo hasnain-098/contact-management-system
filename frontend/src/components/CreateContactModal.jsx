@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
+import { isValidEmail, isValidPhoneNumber } from '../utils/Validation';
 
 const API_BASE_URL = 'http://localhost:8080/api/contacts';
-
-const isValidEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
-
-const isValidPhoneNumber = (phone) => {
-    return /^(?:\+92-\d{3}-\d{7}|03\d{9})$/.test(phone);
-};
 
 function CreateContactModal({ token, onSave, onCancel }) {
     const [formData, setFormData] = useState({
@@ -64,7 +57,7 @@ function CreateContactModal({ token, onSave, onCancel }) {
         const validEmails = data.emails.filter(e => e.email.trim());
         const validPhones = data.phones.filter(p => p.phoneNumber.trim());
 
-        if (validEmails.length === 0 || validPhones.length === 0) {
+        if (validEmails.length === 0 && validPhones.length === 0) {
             return 'A contact must have at least one valid email or one valid phone number.';
         }
 
@@ -93,8 +86,8 @@ function CreateContactModal({ token, onSave, onCancel }) {
 
         const payload = {
             firstName: formData.firstName,
-            lastName: formData.lastName,
-            title: formData.title || '',
+            lastName: formData.lastName || '',
+            title: formData.title || 'N/A',
             emails: formData.emails
                 .filter(e => e.email.trim() !== '')
                 .map(e => ({ label: e.label || 'N/A', email: e.email })),
