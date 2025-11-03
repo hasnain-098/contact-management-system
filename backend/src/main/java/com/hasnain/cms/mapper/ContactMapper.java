@@ -11,6 +11,11 @@ import java.util.stream.Collectors;
 
 public class ContactMapper {
 
+    private ContactMapper() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
+    }
+
+
     public static ContactDTO toDTO(Contact contact) {
 
         if (contact == null) {
