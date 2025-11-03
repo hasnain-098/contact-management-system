@@ -29,7 +29,7 @@ public class ContactMapper {
                 contact.getTitle(),
                 contact.getEmails().stream()
                         .map(email -> new ContactEmailDTO(email.getId(), email.getLabel(), email.getEmail()))
-                                .collect(Collectors.toList()),
+                        .collect(Collectors.toList()),
                 contact.getPhones().stream()
                         .map(phone -> new ContactPhoneDTO(phone.getId(), phone.getLabel(), phone.getPhoneNumber()))
                         .collect(Collectors.toList())
@@ -49,27 +49,31 @@ public class ContactMapper {
         contact.setTitle(contactDTO.getTitle());
 
         contact.setEmails(contactDTO.getEmails().stream()
-                .map(emailDTO -> {
-                    ContactEmail email = new ContactEmail();
-                    email.setId(emailDTO.getId());
-                    email.setLabel(emailDTO.getLabel());
-                    email.setEmail(emailDTO.getEmail());
-                    email.setContact(contact);
-                    return email;
-                })
+                .map(ContactMapper::toEmailEntity) // Use the new helper method
                 .collect(Collectors.toList()));
 
         contact.setPhones(contactDTO.getPhones().stream()
-                .map(phoneDTO -> {
-                    ContactPhone phone = new ContactPhone();
-                    phone.setId(phoneDTO.getId());
-                    phone.setLabel(phoneDTO.getLabel());
-                    phone.setPhoneNumber(phoneDTO.getPhoneNumber());
-                    phone.setContact(contact);
-                    return phone;
-                })
+                .map(ContactMapper::toPhoneEntity) // Use the new helper method
                 .collect(Collectors.toList()));
 
         return contact;
+    }
+
+    public static ContactEmail toEmailEntity(ContactEmailDTO emailDTO) {
+        if (emailDTO == null) return null;
+        ContactEmail email = new ContactEmail();
+        email.setId(emailDTO.getId());
+        email.setLabel(emailDTO.getLabel());
+        email.setEmail(emailDTO.getEmail());
+        return email;
+    }
+
+    public static ContactPhone toPhoneEntity(ContactPhoneDTO phoneDTO) {
+        if (phoneDTO == null) return null;
+        ContactPhone phone = new ContactPhone();
+        phone.setId(phoneDTO.getId());
+        phone.setLabel(phoneDTO.getLabel());
+        phone.setPhoneNumber(phoneDTO.getPhoneNumber());
+        return phone;
     }
 }
