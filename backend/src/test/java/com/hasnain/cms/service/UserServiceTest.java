@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -35,11 +35,11 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    private final String RAW_PASSWORD = "password123";
-    private final String ENCODED_PASSWORD = "encoded_password";
-    private final String VALID_EMAIL = "email@test.com";
-    private final String VALID_PHONE = "03156789608";
-    private final String INVALID_IDENTIFIER = "invalid_email_or_phone";
+    private static final String RAW_PASSWORD = "password123";
+    private static final String ENCODED_PASSWORD = "encoded_password";
+    private static final String VALID_EMAIL = "email@test.com";
+    private static final String VALID_PHONE = "03156789608";
+    private static final String INVALID_IDENTIFIER = "invalid_email_or_phone";
 
     private User userWithEmail;
     private User userWithPhone;
