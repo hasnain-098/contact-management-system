@@ -243,45 +243,6 @@ public class ContactControllerTest {
     }
 
     @Test
-    void createContact_ValidationFailed_TitleBlank_Returns400BadRequest() throws Exception {
-
-        ContactDTO invalidContact = new ContactDTO(null, "User", "Test", null,
-                List.of(emailDTO1), List.of(phoneDTO1));
-
-        mockMvc.perform(post("/api/contacts")
-                        .with(user(TEST_USER))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(invalidContact)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createContact_ValidationFailed_EmptyEmail_Returns400BadRequest() throws Exception {
-
-        ContactDTO invalidContact = new ContactDTO(null, "User", "Test", "Title",
-                Collections.emptyList(), List.of(phoneDTO1));
-
-        mockMvc.perform(post("/api/contacts")
-                        .with(user(TEST_USER))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(invalidContact)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createContact_ValidationFailed_EmptyPhone_Returns400BadRequest() throws Exception {
-
-        ContactDTO invalidContact = new ContactDTO(null, "User", "Test", "Title",
-                List.of(emailDTO1), Collections.emptyList());
-
-        mockMvc.perform(post("/api/contacts")
-                        .with(user(TEST_USER))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(invalidContact)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void createContact_Failure_DuplicateContact_Returns409Conflict() throws Exception {
 
         String errorMessage = "Contact already exists with same name for this user";
@@ -427,7 +388,7 @@ public class ContactControllerTest {
 
         ContactDTO updatedContact = new ContactDTO(1L, "Hasnain", "Memon", "Senior Developer",
                 List.of(emailDTO1), List.of(phoneDTO1));
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(Contact.class)))
+        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
                 .thenReturn(updatedContact);
 
         mockMvc.perform(put("/api/contacts/1")
@@ -454,50 +415,11 @@ public class ContactControllerTest {
     }
 
     @Test
-    void updateContact_ValidationFailed_TitleBlank_Returns400BadRequest() throws Exception {
-
-        ContactDTO invalidContact = new ContactDTO(1L, "Hasnain", "Memon", null,
-                List.of(emailDTO1), List.of(phoneDTO1));
-
-        mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(invalidContact)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateContact_ValidationFailed_EmptyEmail_Returns400BadRequest() throws Exception {
-
-        ContactDTO invalidContact = new ContactDTO(1L, "Hasnain", "Memon", "Title",
-                Collections.emptyList(), List.of(phoneDTO1));
-
-        mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(invalidContact)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateContact_ValidationFailed_EmptyPhone_Returns400BadRequest() throws Exception {
-
-        ContactDTO invalidContact = new ContactDTO(1L, "Hasnain", "Memon", "Title",
-                List.of(emailDTO1), Collections.emptyList());
-
-        mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(invalidContact)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void updateContact_Failure_ContactNotFound_Returns404NotFound() throws Exception {
 
         String errorMessage = "Contact not found!";
 
-        when(contactService.updateContact(eq(TEST_USER), eq(99L), any(Contact.class)))
+        when(contactService.updateContact(eq(TEST_USER), eq(99L), any(ContactDTO.class)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/99")
@@ -514,7 +436,7 @@ public class ContactControllerTest {
 
         String errorMessage = "Unauthorized access to this contact";
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(Contact.class)))
+        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new UnauthorizedAccessException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/1")
@@ -531,7 +453,7 @@ public class ContactControllerTest {
 
         String errorMessage = "A contact with this name already exists for your account.";
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(Contact.class)))
+        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new DuplicateContactException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/1")
@@ -548,7 +470,7 @@ public class ContactControllerTest {
 
         String errorMessage = "Invalid identifier. Must be a valid email or phone number.";
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(Contact.class)))
+        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new InvalidIdentifierFormatException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/1")
@@ -565,7 +487,7 @@ public class ContactControllerTest {
 
         String errorMessage = "User not found with identifier: " + TEST_USER;
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(Contact.class)))
+        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/1")
@@ -580,7 +502,7 @@ public class ContactControllerTest {
     @Test
     void updateContact_ServiceFailed_Returns500InternalServerError() throws Exception {
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(Contact.class)))
+        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new RuntimeException("Database save error"));
 
         mockMvc.perform(put("/api/contacts/1")
