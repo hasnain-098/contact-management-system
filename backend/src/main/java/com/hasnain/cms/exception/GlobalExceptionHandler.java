@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
 
         exception.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldPath = error instanceof FieldError ? ((FieldError) error).getField() : error.getObjectName();
+            String fieldPath = error instanceof FieldError fielderror ? fielderror.getField() : error.getObjectName();
             String defaultMessage = error.getDefaultMessage();
 
             String message = switch (defaultMessage) {
