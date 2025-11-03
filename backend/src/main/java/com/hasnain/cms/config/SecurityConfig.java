@@ -20,7 +20,6 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final UserService userService;
 
-    // Constructor remains the same
     public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserService userService) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userService = userService;
