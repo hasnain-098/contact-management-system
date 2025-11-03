@@ -97,8 +97,8 @@ public class UserService implements UserDetailsService {
 
         if (passwordEncoder.matches(password, userDetails.getPassword())) {
             log.info("User '{}' logged in successfully.", identifier);
-            if (userDetails instanceof SecurityUser) {
-                User user = ((SecurityUser) userDetails).getUser();
+            if (userDetails instanceof SecurityUser securityUser) {
+                User user = securityUser.getUser();
                 return UserMapper.toDTO(user);
             } else {
                 return new UserDTO(userDetails.getUsername(), null);
