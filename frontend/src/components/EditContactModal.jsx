@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { isValidEmail, isValidPhoneNumber } from '../utils/Validation';
 
 const API_BASE_URL = 'http://localhost:8080/api/contacts';
 
@@ -59,10 +60,9 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
             return 'First Name is required.';
         }
 
-        const validEmails = data.emails.filter(e => e.email.trim());
-        const validPhones = data.phones.filter(p => p.phoneNumber.trim());
+        const validEmails = data.emails.filter(e => e.email && e.email.trim() !== '');
+        const validPhones = data.phones.filter(p => p.phoneNumber && p.phoneNumber.trim() !== '');
 
-        // 1. Check: Must have at least one valid email OR one valid phone (Matching the relaxed backend rule)
         if (validEmails.length === 0 && validPhones.length === 0) {
             return 'A contact must have at least one valid email or one valid phone number.';
         }
@@ -92,13 +92,17 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
 
         console.log("Saving changes for contact:", formData.id, formData);
 
-        const emailsToSend = formData.emails
-            .filter(e => e.email.trim() !== '')
-            .map(e => ({ label: e.label || '', email: e.email }));
-        
-        const phonesToSend = formData.phones
-            .filter(p => p.phoneNumber && p.phoneNumber.trim() !== '')
-            .map(p => ({ label: p.label || '', phoneNumber: p.phoneNumber }));
+        const payload = {
+            firstName: formData.firstName,
+            lastName: formData.lastName || '',
+            title: formData.title || 'N/A',
+            emails: formData.emails
+                .filter(e => e.email.trim() !== '')
+                .map(e => ({ label: e.label || 'N/A', email: e.email })),
+            phones: formData.phones
+                .filter(p => p.phoneNumber.trim() !== '')
+                .map(p => ({ label: p.label || 'N/A', phoneNumber: p.phoneNumber })),
+        };
 
         try {
             const response = await fetch(`${API_BASE_URL}/${formData.id}`, {
@@ -107,13 +111,7 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    firstName: formData.firstName,
-                    lastName: formData.lastName || '',
-                    title: formData.title,
-                    emails: emailsToSend,
-                    phones: phonesToSend,
-                }),
+                body: JSON.stringify(payload),
             });
 
             const data = await response.json().catch(() => ({}));
@@ -179,7 +177,6 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
                                             onChange={(e) => handleNestedChange(e, 'emails', index, 'email')}
                                             className="mt-1 w-full input-style-sm"
                                             placeholder="name@example.com"
-                                            required={index === 0}
                                         />
                                     </div>
                                     <div className="col-span-1">
@@ -229,7 +226,6 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
                                             onChange={(e) => handleNestedChange(e, 'phones', index, 'phoneNumber')}
                                             className="mt-1 w-full input-style-sm"
                                             placeholder="+92..."
-                                            required={index === 0}
                                         />
                                     </div>
                                     <div className="col-span-1">
