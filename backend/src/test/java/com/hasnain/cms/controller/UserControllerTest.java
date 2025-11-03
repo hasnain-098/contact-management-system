@@ -48,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(value = UserController.class,
         excludeAutoConfiguration = {UserDetailsServiceAutoConfiguration.class})
-public class UserControllerTest {
+class UserControllerTest {
 
     @RestControllerAdvice
     static class TestSpecificAdvice {
@@ -111,13 +111,13 @@ public class UserControllerTest {
     @MockBean
     private JwtService jwtService;
 
-    private final String VALID_EMAIL = "email@test.com";
-    private final String VALID_PHONE = "+92-315-6789608";
-    private final String INVALID_IDENTIFIER = "invalid_email_or_phone";
-    private final String RAW_PASSWORD = "password123";
-    private final String NEW_PASSWORD = "new_password";
-    private final String INCORRECT_PASSWORD = "incorrect_password";
-    private final String FAKE_TOKEN = "fake.jwt.token";
+    private static final String VALID_EMAIL = "email@test.com";
+    private static final String VALID_PHONE = "+92-315-6789608";
+    private static final String INVALID_IDENTIFIER = "invalid_email_or_phone";
+    private static final String RAW_PASSWORD = "password123";
+    private static final String NEW_PASSWORD = "new_password";
+    private static final String INCORRECT_PASSWORD = "incorrect_password";
+    private static final String FAKE_TOKEN = "fake.jwt.token";
 
     private UserRegistrationDTO userRegistrationDTOWithEmail;
     private UserRegistrationDTO userRegistrationDTOWithPhone;
