@@ -5,6 +5,10 @@ import com.hasnain.cms.entity.User;
 
 public class UserMapper {
 
+    private UserMapper() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
+    }
+
     public static UserDTO toDTO(User user) {
         if (user == null) {
             return null;
