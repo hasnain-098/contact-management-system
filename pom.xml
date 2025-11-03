@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-parent</artifactId>
+       <version>3.3.2</version>
+       <relativePath/>
+    </parent>
+    
+    <groupId>com.hasnain</groupId>
+    <artifactId>contact-management-system</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    
+    <packaging>pom</packaging> 
+    <name>Contact Management System</name>
+    <description>Parent POM for the mono-repository.</description>
+
+    <modules>
+        <module>backend</module>
+    </modules>
+
+    <properties>
+        <java.version>17</java.version>
+        
+        <jacoco.unit.test.argLine>-Xmx512m</jacoco.unit.test.argLine>
+        
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.projectKey>${project.groupId}:${project.artifactId}</sonar.projectKey>
+        <sonar.projectName>${project.name}</sonar.projectName>
+        <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        
+        <sonar.token>${sonar.token}</sonar.token> 
+
+        <sonar.modules>frontend</sonar.modules>
+
+        <frontend.sonar.projectName>CMS Frontend (React)</frontend.sonar.projectName>
+        <frontend.sonar.projectBaseDir>../frontend</frontend.sonar.projectBaseDir>
+        <frontend.sonar.sources>src</frontend.sonar.sources>
+        <frontend.sonar.language>js</frontend.sonar.language>
+        <frontend.sonar.exclusions>**/*.min.js, **/node_modules/**, **/*.test.jsx</frontend.sonar.exclusions>
+        <frontend.sonar.test.exclusions>**/*.test.jsx</frontend.sonar.test.exclusions>
+    </properties>
+    
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.2.5</version> 
+                    <configuration>
+                        <argLine>@{jacoco.unit.test.argLine} -Dmockito.enable.experimental.security-updates=false</argLine>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>5.2.0.4988</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
