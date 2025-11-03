@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ContactServiceTest {
+class ContactServiceTest {
 
     @Mock
     private ContactRepository contactRepository;
@@ -51,9 +51,9 @@ public class ContactServiceTest {
 
     private MockedStatic<ContactMapper> contactMapperMockedStatic;
 
-    private final String TEST_EMAIL = "user@test.com";
-    private final String TEST_PHONE = "+92-312-5467890";
-    private final String INVALID_IDENTIFIER = "invalid_identifier";
+    private static final String TEST_EMAIL = "user@test.com";
+    private static final String TEST_PHONE = "+92-312-5467890";
+    private static final String INVALID_IDENTIFIER = "invalid_identifier";
 
     private User testUserEmail;
     private User testUserPhone;
@@ -69,9 +69,6 @@ public class ContactServiceTest {
     private Contact existingContact;
     private Contact contactToUpdate;
     private ContactDTO updatedContactDTO;
-
-    private ContactEmail testEmailEntity;
-    private ContactPhone testPhoneEntity;
 
     @BeforeEach
     void setUp() {
@@ -128,9 +125,6 @@ public class ContactServiceTest {
         existingContact.setTitle("Old Title");
         existingContact.setEmails(new ArrayList<>());
         existingContact.setPhones(new ArrayList<>());
-
-        testEmailEntity = new ContactEmail();
-        testPhoneEntity = new ContactPhone();
 
         contactToUpdate = new Contact();
         contactToUpdate.setFirstName("New");
@@ -502,7 +496,6 @@ public class ContactServiceTest {
 
     @Test
     void updateContact_Success_NameChange() {
-        // ARRANGE: Create the DTO payload
         ContactDTO contactDTOToUpdate = new ContactDTO(1L, "New", "Name", "New Title",
                 Collections.emptyList(), Collections.emptyList());
 
@@ -555,7 +548,6 @@ public class ContactServiceTest {
 
     @Test
     void updateContact_Success_CollectionChanges() {
-        // ARRANGE: Setup existing contact with items to verify deletion
         ContactEmail existingEmail = new ContactEmail();
         existingEmail.setId(100L);
         existingEmail.setLabel("work");
@@ -570,14 +562,12 @@ public class ContactServiceTest {
         existingPhone.setContact(existingContact);
         existingContact.getPhones().add(existingPhone);
 
-        // ARRANGE: 1. Create the NEW Email DTO payload (Simulating the user keeping the phone and changing the email)
         ContactEmailDTO newEmailDTO = new ContactEmailDTO(null, "home", "new@home.com");
         ContactPhoneDTO oldPhoneDTO = new ContactPhoneDTO(200L, "mobile", "01234567898");
 
         ContactDTO contactDTOToUpdate = new ContactDTO(1L, "Old", "Name", "New Title",
                 List.of(newEmailDTO), List.of(oldPhoneDTO));
 
-        // ARRANGE: 2. Mock the Entity that the Controller receives (This is the critical intermediate step)
         Contact incomingEntityFromMapper = new Contact();
         incomingEntityFromMapper.setFirstName("Old");
         incomingEntityFromMapper.setLastName("Name");
@@ -593,51 +583,39 @@ public class ContactServiceTest {
         newIncomingPhoneEntity.setLabel("mobile");
         newIncomingPhoneEntity.setPhoneNumber("01234567898");
 
-        // Define the list of entities that the service will process
         List<ContactEmail> incomingEmails = List.of(newIncomingEmailEntity);
         List<ContactPhone> incomingPhones = List.of(newIncomingPhoneEntity);
 
-        // Mock the DTO-to-Entity conversion for the specific DTOs
         contactMapperMockedStatic.when(() -> ContactMapper.toEmailEntity(newEmailDTO)).thenReturn(newIncomingEmailEntity);
         contactMapperMockedStatic.when(() -> ContactMapper.toPhoneEntity(oldPhoneDTO)).thenReturn(newIncomingPhoneEntity);
 
-        // Ensure the high-level mapper returns an entity with the correct basic fields
         contactMapperMockedStatic.when(() -> ContactMapper.toEntity(contactDTOToUpdate)).thenAnswer(invocation -> {
             Contact contact = new Contact();
             contact.setId(1L);
             contact.setFirstName(contactDTOToUpdate.getFirstName());
             contact.setLastName(contactDTOToUpdate.getLastName());
             contact.setTitle(contactDTOToUpdate.getTitle());
-            contact.setEmails(incomingEmails); // Manually set the lists based on our mocked entities
+            contact.setEmails(incomingEmails);
             contact.setPhones(incomingPhones);
             return contact;
         });
 
-        // ARRANGE: 4. Mock service dependencies
         when(userService.loadUserByUsername(TEST_EMAIL)).thenReturn(testSecurityUserEmail);
         when(contactRepository.findById(1L)).thenReturn(Optional.of(existingContact));
         when(contactRepository.save(any(Contact.class))).thenReturn(existingContact);
 
-        // ARRANGE: 5. Mock the final DTO conversion
         ContactDTO updatedDTOMock = new ContactDTO(1L, "Old", "Name", "New Title",
                 List.of(new ContactEmailDTO()), List.of(new ContactPhoneDTO()));
         contactMapperMockedStatic.when(() -> ContactMapper.toDTO(existingContact)).thenReturn(updatedDTOMock);
 
-        // ACT
         contactService.updateContact(TEST_EMAIL, 1L, contactDTOToUpdate);
 
-        // ASSERT: Verify the crucial synchronization logic
-
-        // 1. Verify the final managed list size (1 Email, 1 Phone)
-        // Expected: Old lists were cleared, and the two new entities were added.
         assertEquals(1, existingContact.getEmails().size(), "Managed emails list size must equal new payload size.");
         assertEquals(1, existingContact.getPhones().size(), "Managed phones list size must equal new payload size.");
 
-        // 2. Verify the parent link was correctly set on the newly added entities
         assertEquals(existingContact, existingContact.getEmails().get(0).getContact(), "Parent link must be set on the new email entity.");
         assertEquals(existingContact, existingContact.getPhones().get(0).getContact(), "Parent link must be set on the new phone entity.");
 
-        // 3. Verify save happened.
         verify(contactRepository).save(existingContact);
     }
 
