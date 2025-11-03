@@ -219,20 +219,20 @@ function ContactListPage({ token, username, onLogout }) {
             {contactsError && <p className="text-center text-red-500 bg-red-100 p-3 rounded-md border border-red-200">{contactsError}</p>}
 
             {!loadingContacts && !contactsError && (
-                <div className="flex-grow overflow-auto mb-4 border border-gray-200 rounded-lg">
+                <div className="flex-grow overflow-x-auto overflow-y-hidden mb-4 border border-gray-200 rounded-lg">
                     {contacts.length === 0 ? (
                         <p className="text-center text-gray-500 p-10">
                             {debouncedSearchTerm ? 'No contacts found matching your search.' : 'You have no contacts yet.'}
                         </p>
                     ) : (
-                        <table className="min-w-full divide-y divide-gray-200">
+                        <table className="min-w-full divide-y divide-gray-200 text-md">
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                     <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Title</th>
-                                    <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Emails</th>
+                                    <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[35%] sm:w-auto">Emails</th>
                                     <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Phones</th>
-                                    <th scope="col" className="relative px-4 sm:px-6 py-3">Actions</th>
+                                    <th scope="col" className="relative px-4 sm:px-6 py-3 w-[15%] sm:w-auto">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -250,18 +250,18 @@ function ContactListPage({ token, username, onLogout }) {
                                                 ? contact.phones.map(p => <div key={p.id || p.phoneNumber}><span className="font-medium">{p.label || 'N/A'}:</span> {p.phoneNumber}</div>)
                                                 : 'N/A'}
                                         </td>
-                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium align-top">
+                                        <td className="px-2 py-4 whitespace-nowrap text-right align-top">
                                             <button
                                                 onClick={() => handleEditClick(contact)}
                                                 disabled={isProcessingAction}
-                                                className="text-indigo-600 hover:text-indigo-900 mr-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="text-indigo-600 hover:text-indigo-900 mr-1 text-xs sm:text-sm sm:mr-3 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 Edit
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteClick(contact)}
                                                 disabled={isProcessingAction}
-                                                className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="text-red-600 hover:text-red-900 text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 Delete
                                             </button>
