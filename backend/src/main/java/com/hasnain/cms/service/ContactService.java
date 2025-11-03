@@ -2,6 +2,8 @@ package com.hasnain.cms.service;
 
 import com.hasnain.cms.dto.ContactDTO;
 import com.hasnain.cms.entity.Contact;
+import com.hasnain.cms.entity.ContactEmail;
+import com.hasnain.cms.entity.ContactPhone;
 import com.hasnain.cms.entity.User;
 import com.hasnain.cms.exception.DuplicateContactException;
 import com.hasnain.cms.exception.ResourceNotFoundException;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,7 +33,7 @@ public class ContactService {
 
     @Autowired
     private UserService userService;
-    
+
     public List<ContactDTO> getUserContacts(String identifier, String searchTerm, int page, int size) {
 
         log.debug("Fetching contacts for user '{}', Search: '{}' Page: {}, Size: {}.", identifier,
@@ -102,7 +105,7 @@ public class ContactService {
     }
 
     @Transactional
-    public ContactDTO updateContact(String identifier, Long id, Contact contact) {
+    public ContactDTO updateContact(String identifier, Long id, ContactDTO contactDTO) {
 
         log.info("User '{}' attempting to update contact ID: {}.", identifier, id);
         UserDetails userDetails = userService.loadUserByUsername(identifier);
@@ -117,33 +120,36 @@ public class ContactService {
             throw new UnauthorizedAccessException("Unauthorized access to this contact");
         }
 
-        if (!existingContact.getFirstName().equals(contact.getFirstName())
-                || !existingContact.getLastName().equals(contact.getLastName())) {
-            if (contactRepository.existsByUserAndFirstNameAndLastName(user, contact.getFirstName(),
-                    contact.getLastName())) {
+        if (!existingContact.getFirstName().equals(contactDTO.getFirstName())
+                || !existingContact.getLastName().equals(contactDTO.getLastName())) {
+            if (contactRepository.existsByUserAndFirstNameAndLastName(user, contactDTO.getFirstName(),
+                    contactDTO.getLastName())) {
                 log.warn("Update failed: New name '{} {}' is a duplicate for user '{}'.",
-                        contact.getFirstName(), contact.getLastName(), identifier);
+                        contactDTO.getFirstName(), contactDTO.getLastName(), identifier);
                 throw new DuplicateContactException("A contact with this name already exists for your account.");
             }
         }
 
-        existingContact.setFirstName(contact.getFirstName());
-        existingContact.setLastName(contact.getLastName());
-        existingContact.setTitle(contact.getTitle());
+        existingContact.setFirstName(contactDTO.getFirstName());
+        existingContact.setLastName(contactDTO.getLastName());
+        existingContact.setTitle(contactDTO.getTitle());
 
         existingContact.getEmails().clear();
-        contact.getEmails().forEach(email -> {
-            email.setContact(existingContact);
-            existingContact.getEmails().add(email);
-        });
+        List<ContactEmail> updatedEmails = contactDTO.getEmails().stream()
+                .map(ContactMapper::toEmailEntity)
+                .peek(email -> email.setContact(existingContact))
+                .collect(Collectors.toList());
+        existingContact.getEmails().addAll(updatedEmails);
 
         existingContact.getPhones().clear();
-        contact.getPhones().forEach(phone -> {
-            phone.setContact(existingContact);
-            existingContact.getPhones().add(phone);
-        });
+        List<ContactPhone> updatedPhones = contactDTO.getPhones().stream()
+                .map(ContactMapper::toPhoneEntity)
+                .peek(phone -> phone.setContact(existingContact))
+                .collect(Collectors.toList());
+        existingContact.getPhones().addAll(updatedPhones);
 
-        Contact updatedContact =  contactRepository.save(existingContact);
+
+        Contact updatedContact = contactRepository.save(existingContact);
 
         log.info("Successfully updated contact ID: {} for user '{}'.", id, identifier);
         return ContactMapper.toDTO(updatedContact);
@@ -155,10 +161,10 @@ public class ContactService {
         UserDetails userDetails = userService.loadUserByUsername(identifier);
         User user = ((SecurityUser) userDetails).getUser();
         Contact contact = contactRepository.findById(id)
-                        .orElseThrow(() -> {
-                            log.warn("Delete failed: Contact ID {} not found.", id);
-                            return new ResourceNotFoundException("Contact not found.");
-                        });
+                .orElseThrow(() -> {
+                    log.warn("Delete failed: Contact ID {} not found.", id);
+                    return new ResourceNotFoundException("Contact not found.");
+                });
         if (!contact.getUser().getUserId().equals(user.getUserId())) {
             log.warn("Delete failed: User '{}' is unauthorized to delete contact ID: {}", identifier, id);
             throw new UnauthorizedAccessException("Unauthorized access to this contact.");
