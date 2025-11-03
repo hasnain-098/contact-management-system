@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ContactController.class)
-public class ContactControllerTest {
+class ContactControllerTest {
 
     @TestConfiguration
     static class TestSecurityConfig {
@@ -62,22 +62,20 @@ public class ContactControllerTest {
     @MockBean
     private JwtService jwtService;
 
-    private final String TEST_USER = "user@test.com";
+    public static final String TEST_USER_EMAIL = "user@test.com";
     private ContactDTO contactDTO1;
     private ContactDTO contactDTO2;
-    private ContactDTO contactDTO_noId;
+    private ContactDTO contactDTONoId;
     private ContactEmailDTO emailDTO1;
-    private ContactEmailDTO emailDTO2;
     private ContactPhoneDTO phoneDTO1;
-    private ContactPhoneDTO phoneDTO2;
 
     @BeforeEach
     void setUp() {
         emailDTO1 = new ContactEmailDTO(1L, "work", "hasnain@example.com");
         phoneDTO1 = new ContactPhoneDTO(1L, "home", "03134567890");
 
-        emailDTO2 = new ContactEmailDTO(1L, "personal", "john@example.com");
-        phoneDTO2 = new ContactPhoneDTO(1L, "work", "+92-314-0987654");
+        ContactEmailDTO emailDTO2 = new ContactEmailDTO(1L, "personal", "john@example.com");
+        ContactPhoneDTO phoneDTO2 = new ContactPhoneDTO(1L, "work", "+92-314-0987654");
 
         contactDTO1 = new ContactDTO(1L, "Hasnain", "Memon", "Developer",
                 List.of(emailDTO1), List.of(phoneDTO1));
@@ -85,7 +83,7 @@ public class ContactControllerTest {
         contactDTO2 = new ContactDTO(2L, "John", "Smith", "Manager",
                 List.of(emailDTO2), List.of(phoneDTO2));
 
-        contactDTO_noId = new ContactDTO(null, "New", "Contact", "Analyst",
+        contactDTONoId = new ContactDTO(null, "New", "Contact", "Analyst",
                 List.of(new ContactEmailDTO(1L, "home", "new@example.com")),
                 List.of(new ContactPhoneDTO(1L, "home", "03123456789")));
     }
@@ -102,13 +100,13 @@ public class ContactControllerTest {
     void getContacts_Success_NoSearch_Returns200AndContactList() throws Exception {
 
         List<ContactDTO> contacts = List.of(contactDTO1, contactDTO2);
-        when(contactService.getUserContacts(eq(TEST_USER), isNull(), eq(0), eq(10)))
+        when(contactService.getUserContacts(eq(TEST_USER_EMAIL), isNull(), eq(0), eq(10)))
                 .thenReturn(contacts);
 
         mockMvc.perform(get("/api/contacts")
                         .param("page", "0")
                         .param("size", "10")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(2))
@@ -121,14 +119,14 @@ public class ContactControllerTest {
 
         String searchTerm = "Has";
         List<ContactDTO> filteredContacts = List.of(contactDTO1);
-        when(contactService.getUserContacts(eq(TEST_USER), eq(searchTerm), eq(0), eq(10)))
+        when(contactService.getUserContacts(TEST_USER_EMAIL, eq(searchTerm), eq(0), eq(10)))
                 .thenReturn(filteredContacts);
 
         mockMvc.perform(get("/api/contacts")
                         .param("search", searchTerm)
                         .param("page", "0")
                         .param("size", "10")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(1))
@@ -138,13 +136,13 @@ public class ContactControllerTest {
     @Test
     void getContacts_Success_NoSearch_ReturnsEmptyList() throws Exception {
 
-        when(contactService.getUserContacts(eq(TEST_USER), isNull(), eq(0), eq(10)))
+        when(contactService.getUserContacts(eq(TEST_USER_EMAIL), isNull(), eq(0), eq(10)))
                 .thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/contacts")
                         .param("page", "0")
                         .param("size", "10")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(0));
@@ -154,14 +152,14 @@ public class ContactControllerTest {
     void getContacts_Success_WithSearch_ReturnsEmptyList() throws Exception {
 
         String searchTerm = "NoMatch";
-        when(contactService.getUserContacts(eq(TEST_USER), eq(searchTerm), eq(0), eq(10)))
+        when(contactService.getUserContacts(TEST_USER_EMAIL, eq(searchTerm), eq(0), eq(10)))
                 .thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/contacts")
                         .param("search", searchTerm)
                         .param("page", "0")
                         .param("size", "10")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(0));
@@ -171,13 +169,13 @@ public class ContactControllerTest {
     void getContacts_InvalidIdentifierFormat_Returns400BadRequest() throws Exception {
 
         String errorMessage = "Invalid identifier. Must be a valid email or phone number.";
-        when(contactService.getUserContacts(eq(TEST_USER), isNull(), eq(0), eq(10)))
+        when(contactService.getUserContacts(eq(TEST_USER_EMAIL), isNull(), eq(0), eq(10)))
                 .thenThrow(new InvalidIdentifierFormatException(errorMessage));
 
         mockMvc.perform(get("/api/contacts")
                         .param("page", "0")
                         .param("size", "10")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -186,14 +184,14 @@ public class ContactControllerTest {
     @Test
     void getContacts_UserNotFound_Returns404NotFound() throws Exception {
 
-        String errorMessage = "User not found with identifier: " + TEST_USER;
-        when(contactService.getUserContacts(eq(TEST_USER), isNull(), eq(0), eq(10)))
+        String errorMessage = "User not found with identifier: " + TEST_USER_EMAIL;
+        when(contactService.getUserContacts(eq(TEST_USER_EMAIL), isNull(), eq(0), eq(10)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(get("/api/contacts")
                         .param("page", "0")
                         .param("size", "10")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -202,13 +200,13 @@ public class ContactControllerTest {
     @Test
     void getContacts_ServiceFailure_Returns500InternalServerError() throws Exception {
 
-        when(contactService.getUserContacts(eq(TEST_USER), isNull(), eq(0), eq(10)))
+        when(contactService.getUserContacts(eq(TEST_USER_EMAIL), isNull(), eq(0), eq(10)))
                 .thenThrow(new RuntimeException("Database connection failed"));
 
         mockMvc.perform(get("/api/contacts")
                         .param("page", "0")
                         .param("size", "10")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -218,12 +216,12 @@ public class ContactControllerTest {
         ContactDTO savedContact = new ContactDTO(3L, "New", "Contact", "Analyst",
                 List.of(new ContactEmailDTO(1L, "home", "new@example.com")),
                 List.of(new ContactPhoneDTO(1L, "home", "03123456789")));
-        when(contactService.createContact(eq(TEST_USER), any(Contact.class))).thenReturn(savedContact);
+        when(contactService.createContact(eq(TEST_USER_EMAIL), any(Contact.class))).thenReturn(savedContact);
 
         mockMvc.perform(post("/api/contacts")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(contactDTO_noId)))
+                        .content(asJsonString(contactDTONoId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(3L))
                 .andExpect(jsonPath("$.firstName").value("New"));
@@ -236,7 +234,7 @@ public class ContactControllerTest {
                 List.of(emailDTO1), List.of(phoneDTO1));
 
         mockMvc.perform(post("/api/contacts")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidContact)))
                 .andExpect(status().isBadRequest());
@@ -246,13 +244,13 @@ public class ContactControllerTest {
     void createContact_Failure_DuplicateContact_Returns409Conflict() throws Exception {
 
         String errorMessage = "Contact already exists with same name for this user";
-        when(contactService.createContact(eq(TEST_USER), any(Contact.class)))
+        when(contactService.createContact(eq(TEST_USER_EMAIL), any(Contact.class)))
                 .thenThrow(new DuplicateContactException(errorMessage));
 
         mockMvc.perform(post("/api/contacts")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(contactDTO_noId)))
+                        .content(asJsonString(contactDTONoId)))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -262,13 +260,13 @@ public class ContactControllerTest {
     void createContact_Failure_InvalidIdentifierFormat_Returns400BadRequest() throws Exception {
 
         String errorMessage = "Invalid identifier. Must be a valid email or phone number.";
-        when(contactService.createContact(eq(TEST_USER), any(Contact.class)))
+        when(contactService.createContact(eq(TEST_USER_EMAIL), any(Contact.class)))
                 .thenThrow(new InvalidIdentifierFormatException(errorMessage));
 
         mockMvc.perform(post("/api/contacts")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(contactDTO_noId)))
+                        .content(asJsonString(contactDTONoId)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -277,14 +275,14 @@ public class ContactControllerTest {
     @Test
     void createContact_Failure_UserNotFound_Returns404NotFound() throws Exception {
 
-        String errorMessage = "User not found with identifier: " + TEST_USER;
-        when(contactService.createContact(eq(TEST_USER), any(Contact.class)))
+        String errorMessage = "User not found with identifier: " + TEST_USER_EMAIL;
+        when(contactService.createContact(eq(TEST_USER_EMAIL), any(Contact.class)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(post("/api/contacts")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(contactDTO_noId)))
+                        .content(asJsonString(contactDTONoId)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -293,23 +291,23 @@ public class ContactControllerTest {
     @Test
     void createContact_ServiceFailure_Returns500InternalServerError() throws Exception {
 
-        when(contactService.createContact(eq(TEST_USER), any(Contact.class)))
+        when(contactService.createContact(eq(TEST_USER_EMAIL), any(Contact.class)))
                 .thenThrow(new RuntimeException("Database save error"));
 
         mockMvc.perform(post("/api/contacts")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(contactDTO_noId)))
+                        .content(asJsonString(contactDTONoId)))
                 .andExpect(status().isInternalServerError());
     }
 
     @Test
     void getContact_Success_Returns200AndContact() throws Exception {
 
-        when(contactService.getContactById(TEST_USER, 1L)).thenReturn(contactDTO1);
+        when(contactService.getContactById(TEST_USER_EMAIL, 1L)).thenReturn(contactDTO1);
 
         mockMvc.perform(get("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(1L))
@@ -320,11 +318,11 @@ public class ContactControllerTest {
     void getContact_Failure_ContactNotFound_Returns404NotFound() throws Exception {
 
         String errorMessage = "Contact not found";
-        when(contactService.getContactById(TEST_USER, 99L))
+        when(contactService.getContactById(TEST_USER_EMAIL, 99L))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(get("/api/contacts/99")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -334,11 +332,11 @@ public class ContactControllerTest {
     void getContact_Failure_UnauthorizedAccess_Returns403Forbidden() throws Exception {
 
         String errorMessage = "Unauthorized access to this contact";
-        when(contactService.getContactById(TEST_USER, 1L))
+        when(contactService.getContactById(TEST_USER_EMAIL, 1L))
                 .thenThrow(new UnauthorizedAccessException(errorMessage));
 
         mockMvc.perform(get("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isForbidden())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -348,11 +346,11 @@ public class ContactControllerTest {
     void getContact_Failure_InvalidIdentifierFormat_Returns400BadRequest() throws Exception {
 
         String errorMessage = "Invalid identifier. Must be a valid email or phone number.";
-        when(contactService.getContactById(TEST_USER, 1L))
+        when(contactService.getContactById(TEST_USER_EMAIL, 1L))
                 .thenThrow(new InvalidIdentifierFormatException(errorMessage));
 
         mockMvc.perform(get("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -361,12 +359,12 @@ public class ContactControllerTest {
     @Test
     void getContact_Failure_UserNotFound_Returns404NotFound() throws Exception {
 
-        String errorMessage = "User not found with identifier: " + TEST_USER;
-        when(contactService.getContactById(TEST_USER, 1L))
+        String errorMessage = "User not found with identifier: " + TEST_USER_EMAIL;
+        when(contactService.getContactById(TEST_USER_EMAIL, 1L))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(get("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -375,11 +373,11 @@ public class ContactControllerTest {
     @Test
     void getContact_ServiceFailure_Returns500() throws Exception {
 
-        when(contactService.getContactById(TEST_USER, 1L))
+        when(contactService.getContactById(TEST_USER_EMAIL, 1L))
                 .thenThrow(new RuntimeException("Database error"));
 
         mockMvc.perform(get("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -388,11 +386,11 @@ public class ContactControllerTest {
 
         ContactDTO updatedContact = new ContactDTO(1L, "Hasnain", "Memon", "Senior Developer",
                 List.of(emailDTO1), List.of(phoneDTO1));
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
+        when(contactService.updateContact(eq(TEST_USER_EMAIL), eq(1L), any(ContactDTO.class)))
                 .thenReturn(updatedContact);
 
         mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(updatedContact)))
                 .andExpect(status().isOk())
@@ -408,7 +406,7 @@ public class ContactControllerTest {
                 List.of(emailDTO1), List.of(phoneDTO1));
 
         mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invalidContact)))
                 .andExpect(status().isBadRequest());
@@ -419,11 +417,11 @@ public class ContactControllerTest {
 
         String errorMessage = "Contact not found!";
 
-        when(contactService.updateContact(eq(TEST_USER), eq(99L), any(ContactDTO.class)))
+        when(contactService.updateContact(eq(TEST_USER_EMAIL), eq(99L), any(ContactDTO.class)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/99")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(contactDTO1)))
                 .andExpect(status().isNotFound())
@@ -436,11 +434,11 @@ public class ContactControllerTest {
 
         String errorMessage = "Unauthorized access to this contact";
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
+        when(contactService.updateContact(eq(TEST_USER_EMAIL), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new UnauthorizedAccessException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(contactDTO1)))
                 .andExpect(status().isForbidden())
@@ -453,11 +451,11 @@ public class ContactControllerTest {
 
         String errorMessage = "A contact with this name already exists for your account.";
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
+        when(contactService.updateContact(eq(TEST_USER_EMAIL), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new DuplicateContactException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(contactDTO1)))
                 .andExpect(status().isConflict())
@@ -470,11 +468,11 @@ public class ContactControllerTest {
 
         String errorMessage = "Invalid identifier. Must be a valid email or phone number.";
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
+        when(contactService.updateContact(eq(TEST_USER_EMAIL), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new InvalidIdentifierFormatException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(contactDTO1)))
                 .andExpect(status().isBadRequest())
@@ -485,13 +483,13 @@ public class ContactControllerTest {
     @Test
     void updateContact_Failure_UserNotFound_Returns404NotFound() throws Exception {
 
-        String errorMessage = "User not found with identifier: " + TEST_USER;
+        String errorMessage = "User not found with identifier: " + TEST_USER_EMAIL;
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
+        when(contactService.updateContact(eq(TEST_USER_EMAIL), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(contactDTO1)))
                 .andExpect(status().isNotFound())
@@ -502,11 +500,11 @@ public class ContactControllerTest {
     @Test
     void updateContact_ServiceFailed_Returns500InternalServerError() throws Exception {
 
-        when(contactService.updateContact(eq(TEST_USER), eq(1L), any(ContactDTO.class)))
+        when(contactService.updateContact(eq(TEST_USER_EMAIL), eq(1L), any(ContactDTO.class)))
                 .thenThrow(new RuntimeException("Database save error"));
 
         mockMvc.perform(put("/api/contacts/1")
-                        .with(user(TEST_USER))
+                        .with(user(TEST_USER_EMAIL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(contactDTO1)))
                 .andExpect(status().isInternalServerError());
@@ -515,11 +513,11 @@ public class ContactControllerTest {
     @Test
     void deleteContact_Success_Returns200AndSuccessMessage() throws Exception {
 
-        when(contactService.deleteContact(eq(TEST_USER), eq(1L)))
+        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
                 .thenReturn(true);
 
         mockMvc.perform(delete("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Contact deleted successfully"));
     }
@@ -529,11 +527,11 @@ public class ContactControllerTest {
 
         String errorMessage = "Contact not found.";
 
-        when(contactService.deleteContact(eq(TEST_USER), eq(99L)))
+        when(contactService.deleteContact(TEST_USER_EMAIL, eq(99L)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(delete("/api/contacts/99")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -544,11 +542,11 @@ public class ContactControllerTest {
 
         String errorMessage = "Unauthorized access to this contact.";
 
-        when(contactService.deleteContact(eq(TEST_USER), eq(1L)))
+        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
                 .thenThrow(new UnauthorizedAccessException(errorMessage));
 
         mockMvc.perform(delete("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isForbidden())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -559,11 +557,11 @@ public class ContactControllerTest {
 
         String errorMessage = "Invalid identifier. Must be a valid email or phone number.";
 
-        when(contactService.deleteContact(eq(TEST_USER), eq(1L)))
+        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
                 .thenThrow(new InvalidIdentifierFormatException(errorMessage));
 
         mockMvc.perform(delete("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -572,13 +570,13 @@ public class ContactControllerTest {
     @Test
     void deleteContact_Failure_UserNotFound_Returns404NotFound() throws Exception {
 
-        String errorMessage = "User not found with identifier: " + TEST_USER;
+        String errorMessage = "User not found with identifier: " + TEST_USER_EMAIL;
 
-        when(contactService.deleteContact(eq(TEST_USER), eq(1L)))
+        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(delete("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(errorMessage));
@@ -587,11 +585,11 @@ public class ContactControllerTest {
     @Test
     void deleteContact_ServiceFailed_Returns500InternalServerError() throws Exception {
 
-        when(contactService.deleteContact(eq(TEST_USER), eq(1L)))
+        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
                 .thenThrow(new RuntimeException("Database delete error"));
 
         mockMvc.perform(delete("/api/contacts/1")
-                        .with(user(TEST_USER)))
+                        .with(user(TEST_USER_EMAIL)))
                 .andExpect(status().isInternalServerError());
     }
 }
