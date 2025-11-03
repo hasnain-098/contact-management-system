@@ -17,6 +17,8 @@ class CMSApplicationTests {
 
 	@Test
 	void contextLoads() {
+        // This test ensures that the Spring Boot application context loads successfully.
+        // The successful execution of the method body is the assertion itself.
 	}
 
 }
