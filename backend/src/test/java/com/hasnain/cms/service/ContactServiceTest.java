@@ -1,7 +1,11 @@
 package com.hasnain.cms.service;
 
 import com.hasnain.cms.dto.ContactDTO;
+import com.hasnain.cms.dto.ContactEmailDTO;
+import com.hasnain.cms.dto.ContactPhoneDTO;
 import com.hasnain.cms.entity.Contact;
+import com.hasnain.cms.entity.ContactEmail;
+import com.hasnain.cms.entity.ContactPhone;
 import com.hasnain.cms.entity.User;
 import com.hasnain.cms.exception.DuplicateContactException;
 import com.hasnain.cms.exception.ResourceNotFoundException;
@@ -66,6 +70,9 @@ public class ContactServiceTest {
     private Contact contactToUpdate;
     private ContactDTO updatedContactDTO;
 
+    private ContactEmail testEmailEntity;
+    private ContactPhone testPhoneEntity;
+
     @BeforeEach
     void setUp() {
 
@@ -121,6 +128,9 @@ public class ContactServiceTest {
         existingContact.setTitle("Old Title");
         existingContact.setEmails(new ArrayList<>());
         existingContact.setPhones(new ArrayList<>());
+
+        testEmailEntity = new ContactEmail();
+        testPhoneEntity = new ContactPhone();
 
         contactToUpdate = new Contact();
         contactToUpdate.setFirstName("New");
@@ -492,9 +502,11 @@ public class ContactServiceTest {
 
     @Test
     void updateContact_Success_NameChange() {
+        // ARRANGE: Create the DTO payload
+        ContactDTO contactDTOToUpdate = new ContactDTO(1L, "New", "Name", "New Title",
+                Collections.emptyList(), Collections.emptyList());
 
         when(userService.loadUserByUsername(TEST_EMAIL)).thenReturn(testSecurityUserEmail);
-
         when(contactRepository.findById(1L)).thenReturn(Optional.of(existingContact));
 
         when(contactRepository.existsByUserAndFirstNameAndLastName(testUserEmail,
@@ -504,18 +516,23 @@ public class ContactServiceTest {
 
         contactMapperMockedStatic.when(() -> ContactMapper.toDTO(existingContact)).thenReturn(updatedContactDTO);
 
-        ContactDTO result = contactService.updateContact(TEST_EMAIL, 1L, contactToUpdate);
+        ContactDTO result = contactService.updateContact(TEST_EMAIL, 1L, contactDTOToUpdate);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals(contactToUpdate.getFirstName(), result.getFirstName());
         assertEquals(contactToUpdate.getTitle(), result.getTitle());
+
+        verify(contactRepository).save(existingContact);
     }
 
     @Test
     void updateContact_Success_NoNameChange() {
 
-        contactToUpdate.setFirstName("Old");
+        ContactDTO contactDTOToUpdate = new ContactDTO(1L, "Old", "Name", "New Title",
+                Collections.emptyList(), Collections.emptyList());
+
+        existingContact.setFirstName("Old");
 
         when(userService.loadUserByUsername(TEST_EMAIL)).thenReturn(testSecurityUserEmail);
 
@@ -526,17 +543,109 @@ public class ContactServiceTest {
         updatedContactDTO.setFirstName(contactToUpdate.getFirstName());
         contactMapperMockedStatic.when(() -> ContactMapper.toDTO(existingContact)).thenReturn(updatedContactDTO);
 
-        ContactDTO result = contactService.updateContact(TEST_EMAIL, 1L, contactToUpdate);
+        ContactDTO result = contactService.updateContact(TEST_EMAIL, 1L, contactDTOToUpdate);
 
         assertNotNull(result);
         assertEquals(contactToUpdate.getFirstName(), result.getFirstName());
         assertEquals(contactToUpdate.getTitle(), result.getTitle());
 
         verify(contactRepository, never()).existsByUserAndFirstNameAndLastName(any(), any(), any());
+        verify(contactRepository).save(existingContact);
+    }
+
+    @Test
+    void updateContact_Success_CollectionChanges() {
+        // ARRANGE: Setup existing contact with items to verify deletion
+        ContactEmail existingEmail = new ContactEmail();
+        existingEmail.setId(100L);
+        existingEmail.setLabel("work");
+        existingEmail.setEmail("old@email.com");
+        existingEmail.setContact(existingContact);
+        existingContact.getEmails().add(existingEmail);
+
+        ContactPhone existingPhone = new ContactPhone();
+        existingPhone.setId(200L);
+        existingPhone.setLabel("mobile");
+        existingPhone.setPhoneNumber("01234567898");
+        existingPhone.setContact(existingContact);
+        existingContact.getPhones().add(existingPhone);
+
+        // ARRANGE: 1. Create the NEW Email DTO payload (Simulating the user keeping the phone and changing the email)
+        ContactEmailDTO newEmailDTO = new ContactEmailDTO(null, "home", "new@home.com");
+        ContactPhoneDTO oldPhoneDTO = new ContactPhoneDTO(200L, "mobile", "01234567898");
+
+        ContactDTO contactDTOToUpdate = new ContactDTO(1L, "Old", "Name", "New Title",
+                List.of(newEmailDTO), List.of(oldPhoneDTO));
+
+        // ARRANGE: 2. Mock the Entity that the Controller receives (This is the critical intermediate step)
+        Contact incomingEntityFromMapper = new Contact();
+        incomingEntityFromMapper.setFirstName("Old");
+        incomingEntityFromMapper.setLastName("Name");
+        incomingEntityFromMapper.setTitle("New Title");
+
+        ContactEmail newIncomingEmailEntity = new ContactEmail();
+        newIncomingEmailEntity.setId(null);
+        newIncomingEmailEntity.setLabel("home");
+        newIncomingEmailEntity.setEmail("new@home.com");
+
+        ContactPhone newIncomingPhoneEntity = new ContactPhone();
+        newIncomingPhoneEntity.setId(200L);
+        newIncomingPhoneEntity.setLabel("mobile");
+        newIncomingPhoneEntity.setPhoneNumber("01234567898");
+
+        // Define the list of entities that the service will process
+        List<ContactEmail> incomingEmails = List.of(newIncomingEmailEntity);
+        List<ContactPhone> incomingPhones = List.of(newIncomingPhoneEntity);
+
+        // Mock the DTO-to-Entity conversion for the specific DTOs
+        contactMapperMockedStatic.when(() -> ContactMapper.toEmailEntity(newEmailDTO)).thenReturn(newIncomingEmailEntity);
+        contactMapperMockedStatic.when(() -> ContactMapper.toPhoneEntity(oldPhoneDTO)).thenReturn(newIncomingPhoneEntity);
+
+        // Ensure the high-level mapper returns an entity with the correct basic fields
+        contactMapperMockedStatic.when(() -> ContactMapper.toEntity(contactDTOToUpdate)).thenAnswer(invocation -> {
+            Contact contact = new Contact();
+            contact.setId(1L);
+            contact.setFirstName(contactDTOToUpdate.getFirstName());
+            contact.setLastName(contactDTOToUpdate.getLastName());
+            contact.setTitle(contactDTOToUpdate.getTitle());
+            contact.setEmails(incomingEmails); // Manually set the lists based on our mocked entities
+            contact.setPhones(incomingPhones);
+            return contact;
+        });
+
+        // ARRANGE: 4. Mock service dependencies
+        when(userService.loadUserByUsername(TEST_EMAIL)).thenReturn(testSecurityUserEmail);
+        when(contactRepository.findById(1L)).thenReturn(Optional.of(existingContact));
+        when(contactRepository.save(any(Contact.class))).thenReturn(existingContact);
+
+        // ARRANGE: 5. Mock the final DTO conversion
+        ContactDTO updatedDTOMock = new ContactDTO(1L, "Old", "Name", "New Title",
+                List.of(new ContactEmailDTO()), List.of(new ContactPhoneDTO()));
+        contactMapperMockedStatic.when(() -> ContactMapper.toDTO(existingContact)).thenReturn(updatedDTOMock);
+
+        // ACT
+        contactService.updateContact(TEST_EMAIL, 1L, contactDTOToUpdate);
+
+        // ASSERT: Verify the crucial synchronization logic
+
+        // 1. Verify the final managed list size (1 Email, 1 Phone)
+        // Expected: Old lists were cleared, and the two new entities were added.
+        assertEquals(1, existingContact.getEmails().size(), "Managed emails list size must equal new payload size.");
+        assertEquals(1, existingContact.getPhones().size(), "Managed phones list size must equal new payload size.");
+
+        // 2. Verify the parent link was correctly set on the newly added entities
+        assertEquals(existingContact, existingContact.getEmails().get(0).getContact(), "Parent link must be set on the new email entity.");
+        assertEquals(existingContact, existingContact.getPhones().get(0).getContact(), "Parent link must be set on the new phone entity.");
+
+        // 3. Verify save happened.
+        verify(contactRepository).save(existingContact);
     }
 
     @Test
     void updateContact_Failure_InvalidIdentifierFormat() {
+
+        ContactDTO contactDTOToUpdate = new ContactDTO(1L, "Old", "Name", "New Title",
+                Collections.emptyList(), Collections.emptyList());
 
         String expectedError = "Invalid identifier. Must be a valid email or phone number.";
         when(userService.loadUserByUsername(INVALID_IDENTIFIER))
@@ -544,7 +653,7 @@ public class ContactServiceTest {
 
         UsernameNotFoundException exception = assertThrows(
                 UsernameNotFoundException.class,
-                () -> contactService.updateContact(INVALID_IDENTIFIER, 1L, contactToUpdate)
+                () -> contactService.updateContact(INVALID_IDENTIFIER, 1L, contactDTOToUpdate)
         );
 
         assertEquals(expectedError, exception.getMessage());
@@ -553,13 +662,16 @@ public class ContactServiceTest {
     @Test
     void updateContact_Failure_UserNotFound() {
 
+        ContactDTO contactDTOToUpdate = new ContactDTO(1L, "Old", "Name", "New Title",
+                Collections.emptyList(), Collections.emptyList());
+
         String expectedError = "User not found with identifier: " + TEST_EMAIL;
         when(userService.loadUserByUsername(TEST_EMAIL))
                 .thenThrow(new UsernameNotFoundException(expectedError));
 
         UsernameNotFoundException exception = assertThrows(
                 UsernameNotFoundException.class,
-                () -> contactService.updateContact(TEST_EMAIL, 1L, contactToUpdate)
+                () -> contactService.updateContact(TEST_EMAIL, 1L, contactDTOToUpdate)
         );
 
         assertEquals(expectedError, exception.getMessage());
@@ -568,6 +680,9 @@ public class ContactServiceTest {
     @Test
     void updateContact_Failure_ContactNotFound() {
 
+        ContactDTO contactDTOToUpdate = new ContactDTO(1L, "Old", "Name", "New Title",
+                Collections.emptyList(), Collections.emptyList());
+
         String expectedError = "Contact not found!";
 
         when(userService.loadUserByUsername(TEST_EMAIL)).thenReturn(testSecurityUserEmail);
@@ -575,7 +690,7 @@ public class ContactServiceTest {
 
         ResourceNotFoundException exception = assertThrows(
                 ResourceNotFoundException.class,
-                () -> contactService.updateContact(TEST_EMAIL, 99L, contactToUpdate)
+                () -> contactService.updateContact(TEST_EMAIL, 99L, contactDTOToUpdate)
         );
 
         assertEquals(expectedError, exception.getMessage());
@@ -583,6 +698,9 @@ public class ContactServiceTest {
 
     @Test
     void updateContact_Failure_UnauthorizedAccess() {
+
+        ContactDTO contactDTOToUpdate = new ContactDTO(1L, "Old", "Name", "New Title",
+                Collections.emptyList(), Collections.emptyList());
 
         String expectedError = "Unauthorized access to this contact";
 
@@ -594,7 +712,7 @@ public class ContactServiceTest {
 
         UnauthorizedAccessException exception = assertThrows(
                 UnauthorizedAccessException.class,
-                () -> contactService.updateContact(TEST_EMAIL, 1L, contactToUpdate)
+                () -> contactService.updateContact(TEST_EMAIL, 1L, contactDTOToUpdate)
         );
 
         assertEquals(expectedError, exception.getMessage());
@@ -602,6 +720,9 @@ public class ContactServiceTest {
 
     @Test
     void updateContact_Failure_DuplicateContact() {
+
+        ContactDTO contactDTOToUpdate = new ContactDTO(1L, "New", "Name", "New Title",
+                Collections.emptyList(), Collections.emptyList());
 
         String expectedError = "A contact with this name already exists for your account.";
 
@@ -612,7 +733,7 @@ public class ContactServiceTest {
 
         DuplicateContactException exception = assertThrows(
                 DuplicateContactException.class,
-                () -> contactService.updateContact(TEST_EMAIL, 1L, contactToUpdate)
+                () -> contactService.updateContact(TEST_EMAIL, 1L, contactDTOToUpdate)
         );
 
         assertEquals(expectedError, exception.getMessage());
