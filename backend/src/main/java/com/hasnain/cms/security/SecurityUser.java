@@ -13,7 +13,7 @@ import java.util.Collections;
 @AllArgsConstructor
 public class SecurityUser implements UserDetails {
 
-    private final transient User user;
+    private final User user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
