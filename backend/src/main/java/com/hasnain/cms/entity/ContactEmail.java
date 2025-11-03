@@ -3,6 +3,7 @@ package com.hasnain.cms.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "contact_emails")
@@ -21,5 +22,6 @@ public class ContactEmail {
 
     @ManyToOne
     @JoinColumn(name = "contact_id")
+    @ToString.Exclude
     private Contact contact;
 }
