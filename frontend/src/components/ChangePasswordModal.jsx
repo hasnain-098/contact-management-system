@@ -54,8 +54,9 @@ function ChangePasswordModal({ token, onSuccess, onCancel, onLogout }) {
 
             if (!response.ok) {
                 if (response.status === 401 || response.status === 403) {
-                    onLogout();
-                    throw new Error('Session expired or unauthorized. Logging out.');
+                    const message = 'Session expired or unauthorized. Logging out.';
+                    onLogout(message);
+                    throw new Error(message);
                 }
                 throw new Error(data.error || 'Password change failed.');
             }
