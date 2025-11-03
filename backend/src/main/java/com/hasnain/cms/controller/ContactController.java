@@ -5,7 +5,6 @@ import com.hasnain.cms.mapper.ContactMapper;
 import com.hasnain.cms.service.ContactService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,8 +18,11 @@ import java.util.List;
 @RequestMapping("/api/contacts")
 public class ContactController {
 
-    @Autowired
-    private ContactService contactService;
+    private final ContactService contactService;
+
+    public ContactController(ContactService contactService) {
+        this.contactService = contactService;
+    }
 
     @GetMapping
     public ResponseEntity<List<ContactDTO>> getContacts(
