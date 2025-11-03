@@ -12,7 +12,6 @@ import com.hasnain.cms.mapper.ContactMapper;
 import com.hasnain.cms.repository.ContactRepository;
 import com.hasnain.cms.security.SecurityUser;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,11 +27,14 @@ import java.util.stream.Collectors;
 @Service
 public class ContactService {
 
-    @Autowired
-    private ContactRepository contactRepository;
+    private final ContactRepository contactRepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public ContactService(ContactRepository contactRepository, UserService userService) {
+        this.contactRepository = contactRepository;
+        this.userService = userService;
+    }
 
     public List<ContactDTO> getUserContacts(String identifier, String searchTerm, int page, int size) {
 
@@ -120,14 +122,16 @@ public class ContactService {
             throw new UnauthorizedAccessException("Unauthorized access to this contact");
         }
 
-        if (!existingContact.getFirstName().equals(contactDTO.getFirstName())
-                || !existingContact.getLastName().equals(contactDTO.getLastName())) {
-            if (contactRepository.existsByUserAndFirstNameAndLastName(user, contactDTO.getFirstName(),
-                    contactDTO.getLastName())) {
-                log.warn("Update failed: New name '{} {}' is a duplicate for user '{}'.",
-                        contactDTO.getFirstName(), contactDTO.getLastName(), identifier);
-                throw new DuplicateContactException("A contact with this name already exists for your account.");
-            }
+        boolean isNameChanged = !existingContact.getFirstName().equals(contactDTO.getFirstName())
+                || !existingContact.getLastName().equals(contactDTO.getLastName());
+
+        boolean isDuplicate = contactRepository.existsByUserAndFirstNameAndLastName(
+                user, contactDTO.getFirstName(), contactDTO.getLastName());
+
+        if (isNameChanged && isDuplicate) {
+            log.warn("Update failed: New name '{} {}' is a duplicate for user '{}'.",
+                    contactDTO.getFirstName(), contactDTO.getLastName(), identifier);
+            throw new DuplicateContactException("A contact with this name already exists for your account.");
         }
 
         existingContact.setFirstName(contactDTO.getFirstName());
