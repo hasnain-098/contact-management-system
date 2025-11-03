@@ -76,7 +76,7 @@ public class ContactController {
         log.info("User '{}' initiating update for contact ID: {}", username, id);
 
         ContactDTO updatedContact = contactService.updateContact(username, id,
-                ContactMapper.toEntity(contactDTO));
+                contactDTO);
 
         log.info("User '{}' successfully updated contact ID: {}", username, id);
         return ResponseEntity.ok(updatedContact);
