@@ -109,36 +109,44 @@ function App() {
         console.log('Logging out');
         setToken(null);
         setUsername(null);
-        setError(message);
+        setError(typeof message === 'string' ? message : ''); 
     };
+
+    let pageContent;
+
+    if (token) {
+        pageContent = (
+            <ContactListPage
+                token={token}
+                username={username}
+                onLogout={handleLogout}
+            />
+        );
+    } else if (view === 'login') {
+        pageContent = (
+            <LoginPage
+                onLogin={handleLogin}
+                switchToRegister={() => { setView('register'); setError(''); }}
+                error={error}
+                loading={loading}
+            />
+        );
+    } else {
+        pageContent = (
+            <RegisterPage
+                onRegister={handleRegister}
+                switchToLogin={() => { setView('login'); setError(''); }}
+                error={error}
+                loading={loading}
+            />
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 font-sans flex flex-col items-center justify-center p-4">
             {!token && < h1 className="text-4xl font-bold text-indigo-700 mb-8 drop-shadow-md font-['Inter',_sans-serif]">Contact Management System</h1>}
 
-            {!token ? (
-                view === 'login' ? (
-                    <LoginPage
-                        onLogin={handleLogin}
-                        switchToRegister={() => { setView('register'); setError(''); }}
-                        error={error}
-                        loading={loading}
-                    />
-                ) : (
-                    <RegisterPage
-                        onRegister={handleRegister}
-                        switchToLogin={() => { setView('login'); setError(''); }}
-                        error={error}
-                        loading={loading}
-                    />
-                )
-            ) : (
-                <ContactListPage
-                    token={token}
-                    username={username}
-                    onLogout={handleLogout}
-                />
-            )}
+            {pageContent}
         </div>
     );
 }
