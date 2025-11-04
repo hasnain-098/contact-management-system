@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PropTypes from 'prop-types'; 
 import { EyeIcon, EyeOffIcon, Spinner } from "../utils/Icons";
 
 function LoginPage({ onLogin, switchToRegister, error, loading }) {
@@ -80,5 +81,12 @@ function LoginPage({ onLogin, switchToRegister, error, loading }) {
         </div>
     );
 }
+
+LoginPage.propTypes = {
+    onLogin: PropTypes.func.isRequired,
+    switchToRegister: PropTypes.func.isRequired,
+    error: PropTypes.string,
+    loading: PropTypes.bool.isRequired,
+};
 
 export default LoginPage;
