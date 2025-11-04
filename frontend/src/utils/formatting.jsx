@@ -1,9 +1,11 @@
 export const formatDisplayName = (username) => {
-    if (username && username.includes('@')) {
+    if (username && typeof username === 'string'  && username.includes('@')) {
         let namePart = username.substring(0, username.indexOf('@'));
-        namePart = namePart.replace(/[._]/g, ' ');
+        const cleanedNamePart = namePart
+            .replaceAll('.', ' ')
+            .replaceAll('_', ' ');
 
-        return namePart.split(' ').map(word =>
+        return cleanedNamePart.split(' ').map(word =>
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
     }
