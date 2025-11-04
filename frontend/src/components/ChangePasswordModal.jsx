@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types'; 
 import { EyeIcon, EyeOffIcon, Spinner } from '../utils/Icons';
 
 const API_BASE_URL = 'http://localhost:8080/api/auth';
@@ -176,5 +177,12 @@ function ChangePasswordModal({ token, onSuccess, onCancel, onLogout }) {
         </div>
     );
 }
+
+ChangePasswordModal.propTypes = {
+    token: PropTypes.string.isRequired,
+    onSuccess: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
+    onLogout: PropTypes.func.isRequired,
+};
 
 export default ChangePasswordModal;
