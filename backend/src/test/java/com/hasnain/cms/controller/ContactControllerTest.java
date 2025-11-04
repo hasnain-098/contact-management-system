@@ -119,7 +119,7 @@ class ContactControllerTest {
 
         String searchTerm = "Has";
         List<ContactDTO> filteredContacts = List.of(contactDTO1);
-        when(contactService.getUserContacts(TEST_USER_EMAIL, eq(searchTerm), eq(0), eq(10)))
+        when(contactService.getUserContacts(eq(TEST_USER_EMAIL), eq(searchTerm), eq(0), eq(10)))
                 .thenReturn(filteredContacts);
 
         mockMvc.perform(get("/api/contacts")
@@ -152,7 +152,7 @@ class ContactControllerTest {
     void getContacts_Success_WithSearch_ReturnsEmptyList() throws Exception {
 
         String searchTerm = "NoMatch";
-        when(contactService.getUserContacts(TEST_USER_EMAIL, eq(searchTerm), eq(0), eq(10)))
+        when(contactService.getUserContacts(eq(TEST_USER_EMAIL), eq(searchTerm), eq(0), eq(10)))
                 .thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/contacts")
@@ -513,7 +513,7 @@ class ContactControllerTest {
     @Test
     void deleteContact_Success_Returns200AndSuccessMessage() throws Exception {
 
-        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
+        when(contactService.deleteContact(eq(TEST_USER_EMAIL), eq(1L)))
                 .thenReturn(true);
 
         mockMvc.perform(delete("/api/contacts/1")
@@ -527,7 +527,7 @@ class ContactControllerTest {
 
         String errorMessage = "Contact not found.";
 
-        when(contactService.deleteContact(TEST_USER_EMAIL, eq(99L)))
+        when(contactService.deleteContact(eq(TEST_USER_EMAIL), eq(99L)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(delete("/api/contacts/99")
@@ -542,7 +542,7 @@ class ContactControllerTest {
 
         String errorMessage = "Unauthorized access to this contact.";
 
-        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
+        when(contactService.deleteContact(eq(TEST_USER_EMAIL), eq(1L)))
                 .thenThrow(new UnauthorizedAccessException(errorMessage));
 
         mockMvc.perform(delete("/api/contacts/1")
@@ -557,7 +557,7 @@ class ContactControllerTest {
 
         String errorMessage = "Invalid identifier. Must be a valid email or phone number.";
 
-        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
+        when(contactService.deleteContact(eq(TEST_USER_EMAIL), eq(1L)))
                 .thenThrow(new InvalidIdentifierFormatException(errorMessage));
 
         mockMvc.perform(delete("/api/contacts/1")
@@ -572,7 +572,7 @@ class ContactControllerTest {
 
         String errorMessage = "User not found with identifier: " + TEST_USER_EMAIL;
 
-        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
+        when(contactService.deleteContact(eq(TEST_USER_EMAIL), eq(1L)))
                 .thenThrow(new ResourceNotFoundException(errorMessage));
 
         mockMvc.perform(delete("/api/contacts/1")
@@ -585,7 +585,7 @@ class ContactControllerTest {
     @Test
     void deleteContact_ServiceFailed_Returns500InternalServerError() throws Exception {
 
-        when(contactService.deleteContact(TEST_USER_EMAIL, eq(1L)))
+        when(contactService.deleteContact(eq(TEST_USER_EMAIL), eq(1L)))
                 .thenThrow(new RuntimeException("Database delete error"));
 
         mockMvc.perform(delete("/api/contacts/1")
