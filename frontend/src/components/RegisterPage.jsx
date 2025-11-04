@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import PropTypes from 'prop-types'; 
 import { EyeIcon, EyeOffIcon, Spinner } from "../utils/Icons";
 
 function RegisterPage({ onRegister, switchToLogin, error, loading }) {
@@ -86,7 +87,7 @@ function RegisterPage({ onRegister, switchToLogin, error, loading }) {
                             id="confirm-password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-150 ${!passwordMatch ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'}`}
+                            className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-150 ${passwordMatch ? 'border-gray-300 focus:ring-indigo-500' : 'border-red-500 focus:ring-red-500'}`}
                             placeholder="••••••••"
                             required
                             aria-label="Confirm Password"
@@ -128,5 +129,12 @@ function RegisterPage({ onRegister, switchToLogin, error, loading }) {
         </div>
     );
 }
+
+RegisterPage.propTypes = {
+    onRegister: PropTypes.func.isRequired,
+    switchToLogin: PropTypes.func.isRequired,
+    error: PropTypes.string,
+    loading: PropTypes.bool.isRequired,
+};
 
 export default RegisterPage;
