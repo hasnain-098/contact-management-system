@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'; 
 import { Spinner } from "../utils/Icons";
 
 function DeleteConfirmModal({ isOpen, onCancel, onConfirm, contactName, isProcessing }) {
@@ -37,5 +38,13 @@ function DeleteConfirmModal({ isOpen, onCancel, onConfirm, contactName, isProces
         </div>
     );
 }
+
+DeleteConfirmModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onCancel: PropTypes.func.isRequired,
+    onConfirm: PropTypes.func.isRequired,
+    contactName: PropTypes.string,
+    isProcessing: PropTypes.bool.isRequired,
+};
 
 export default DeleteConfirmModal;
