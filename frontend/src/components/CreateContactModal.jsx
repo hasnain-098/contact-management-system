@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types'; 
 import { isValidEmail, isValidPhoneNumber } from '../utils/Validation';
 
 const API_BASE_URL = 'http://localhost:8080/api/contacts';
@@ -147,7 +148,7 @@ function CreateContactModal({ token, onSave, onCancel }) {
                         <fieldset className="border p-3 rounded-md space-y-2">
                             <legend className="text-sm font-medium text-gray-700 px-1">Emails *</legend>
                             {formData.emails?.map((emailItem, index) => (
-                                <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                <div key={emailItem.id || `new-email-${index}`} className="grid grid-cols-6 gap-2 items-end">
                                     <div className="col-span-2">
                                         <label htmlFor={`create-email-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
                                         <input
@@ -200,7 +201,7 @@ function CreateContactModal({ token, onSave, onCancel }) {
                         <fieldset className="border p-3 rounded-md space-y-2">
                             <legend className="text-sm font-medium text-gray-700 px-1">Phone Numbers *</legend>
                             {formData.phones?.map((phoneItem, index) => (
-                                <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                <div key={phoneItem.id || `new-phone-${index}`} className="grid grid-cols-6 gap-2 items-end">
                                     <div className="col-span-2">
                                         <label htmlFor={`create-phone-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
                                         <input
@@ -316,5 +317,11 @@ function CreateContactModal({ token, onSave, onCancel }) {
         </div>
     );
 }
+
+CreateContactModal.propTypes = {
+    token: PropTypes.string.isRequired,
+    onSave: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
+};
 
 export default CreateContactModal;
