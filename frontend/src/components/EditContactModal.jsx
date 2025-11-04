@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import PropTypes from 'prop-types'; 
 import { isValidEmail, isValidPhoneNumber } from '../utils/Validation';
 
 const API_BASE_URL = 'http://localhost:8080/api/contacts';
@@ -156,7 +157,7 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
                         <fieldset className="border p-3 rounded-md space-y-2">
                             <legend className="text-sm font-medium text-gray-700 px-1">Emails *</legend>
                             {formData.emails?.map((emailItem, index) => (
-                                <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                <div key={emailItem.id || `new-email-${index}`} className="grid grid-cols-6 gap-2 items-end">
                                     <div className="col-span-2">
                                         <label htmlFor={`edit-email-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
                                         <input
@@ -205,7 +206,7 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
                         <fieldset className="border p-3 rounded-md space-y-2">
                             <legend className="text-sm font-medium text-gray-700 px-1">Phone Numbers *</legend>
                             {formData.phones?.map((phoneItem, index) => (
-                                <div key={index} className="grid grid-cols-6 gap-2 items-end">
+                                <div key={phoneItem.id || `new-phone-${index}`} className="grid grid-cols-6 gap-2 items-end">
                                     <div className="col-span-2">
                                         <label htmlFor={`edit-phone-label-${index}`} className="text-xs font-medium text-gray-600">Label</label>
                                         <input
@@ -313,5 +314,12 @@ function EditContactModal({ contact, onSave, onCancel, token }) {
         </div>
     );
 }
+
+EditContactModal.propTypes = {
+    contact: PropTypes.object.isRequired,
+    onSave: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
+    token: PropTypes.string.isRequired,
+};
 
 export default EditContactModal;
