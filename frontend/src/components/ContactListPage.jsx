@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types'; 
 import EditContactModal from './EditContactModal';
 import DeleteConfirmModal from './DeleteConfirmationModal';
 import CreateContactModal from './CreateContactModal';
@@ -339,5 +340,11 @@ function ContactListPage({ token, username, onLogout }) {
         </div>
     );
 }
+
+ContactListPage.propTypes = {
+    token: PropTypes.string.isRequired,
+    username: PropTypes.string,
+    onLogout: PropTypes.func.isRequired,
+};
 
 export default ContactListPage;
