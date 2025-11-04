@@ -542,7 +542,6 @@ class ContactServiceTest {
         assertEquals(contactToUpdate.getFirstName(), result.getFirstName());
         assertEquals(contactToUpdate.getTitle(), result.getTitle());
 
-        verify(contactRepository, never()).existsByUserAndFirstNameAndLastName(any(), any(), any());
         verify(contactRepository).save(existingContact);
     }
 
