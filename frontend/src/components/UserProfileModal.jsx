@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'; 
 import { formatDisplayName } from '../utils/Formatting';
 import { ProfileIcon } from '../utils/Icons';
 
 function UserProfileModal({ username, onLogout, onCancel, onChangePasswordClick }) {
-    const [message, setMessage] = useState('');
     const displayName = formatDisplayName(username);
 
     return (
@@ -29,12 +29,6 @@ function UserProfileModal({ username, onLogout, onCancel, onChangePasswordClick 
                     <p className="text-sm text-gray-500 font-medium truncate mb-6 border-b pb-2">{username}</p>
                 </div>
 
-                {message && (
-                    <p className={`text-center text-sm p-2 rounded-md mb-4 ${message.includes('placeholder') ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                        {message}
-                    </p>
-                )}
-
                 <div className="space-y-3">
                     <button
                         onClick={onChangePasswordClick}
@@ -56,5 +50,12 @@ function UserProfileModal({ username, onLogout, onCancel, onChangePasswordClick 
         </div>
     );
 }
+
+UserProfileModal.propTypes = {
+    username: PropTypes.string.isRequired,
+    onLogout: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
+    onChangePasswordClick: PropTypes.func.isRequired,
+};
 
 export default UserProfileModal;
