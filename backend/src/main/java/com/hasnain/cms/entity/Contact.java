@@ -40,7 +40,7 @@ public class Contact {
 
     @PrePersist
     @PreUpdate
-    private void validateContactDetails() {
+    void validateContactDetails() {
 
         boolean hasEmails = emails != null && !emails.isEmpty();
         boolean hasPhones = phones != null && !phones.isEmpty();
