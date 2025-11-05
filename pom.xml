@@ -34,8 +34,7 @@
         <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        
-        <sonar.token>${sonar.token}</sonar.token> 
+        <sonar.token>${env.SONAR_TOKEN}</sonar.token> 
 
         <sonar.modules>frontend</sonar.modules>
 
@@ -55,7 +54,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.2.5</version> 
                     <configuration>
-                        <argLine>@{jacoco.unit.test.argLine} -Dmockito.enable.experimental.security-updates=false</argLine>
+                        <argLine>${argLine}</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
