@@ -278,7 +278,7 @@ function ContactListPage({ token, username, onLogout }) {
             {!loadingContacts && !contactsError && (contacts.length > 0 || page > 0) && (
                 <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                     <button onClick={handlePrevPage} disabled={page === 0 || loadingContacts} className={`px-4 py-1.5 rounded-md text-sm font-medium transition duration-150 ${page === 0 || loadingContacts ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1'}`}>Previous</button>
-                    <span className="text-sm text-gray-600">Page {page + 1}</span>
+                    <span data-testid="page-number" className="text-sm text-gray-600">Page {page + 1}</span>
                     <button onClick={handleNextPage} disabled={isLastPage || loadingContacts} className={`px-4 py-1.5 rounded-md text-sm font-medium transition duration-150 ${isLastPage || loadingContacts ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1'}`}>Next</button>
                 </div>
             )}
