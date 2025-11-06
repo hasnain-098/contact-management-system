@@ -42,8 +42,9 @@
         <frontend.sonar.projectBaseDir>../frontend</frontend.sonar.projectBaseDir>
         <frontend.sonar.sources>src</frontend.sonar.sources>
         <frontend.sonar.language>js</frontend.sonar.language>
-        <frontend.sonar.exclusions>**/*.min.js, **/node_modules/**, **/*.test.jsx</frontend.sonar.exclusions>
+        <frontend.sonar.exclusions>**/*.min.js, **/node_modules/**, **/*.test.jsx, **/App.jsx, **/Icons.jsx, **/Validation.jsx</frontend.sonar.exclusions>
         <frontend.sonar.test.exclusions>**/*.test.jsx</frontend.sonar.test.exclusions>
+        <frontend.sonar.javascript.lcov.reportPaths>coverage/lcov.info</frontend.sonar.javascript.lcov.reportPaths>
     </properties>
     
     <build>
