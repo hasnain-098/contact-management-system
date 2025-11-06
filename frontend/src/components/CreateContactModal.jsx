@@ -145,7 +145,7 @@ function CreateContactModal({ token, onSave, onCancel }) {
                             <input type="text" id="create-title" name="title" value={formData.title || ''} onChange={handleChange} className="mt-1 w-full input-style" disabled={isProcessing} />
                         </div>
 
-                        <fieldset className="border p-3 rounded-md space-y-2">
+                        <fieldset data-testid="email-fieldset" className="border p-3 rounded-md space-y-2">
                             <legend className="text-sm font-medium text-gray-700 px-1">Emails *</legend>
                             {formData.emails?.map((emailItem, index) => (
                                 <div key={emailItem.id || `new-email-${index}`} className="grid grid-cols-6 gap-2 items-end">
@@ -198,7 +198,7 @@ function CreateContactModal({ token, onSave, onCancel }) {
                             </button>
                         </fieldset>
 
-                        <fieldset className="border p-3 rounded-md space-y-2">
+                        <fieldset data-testid="phone-fieldset" className="border p-3 rounded-md space-y-2">
                             <legend className="text-sm font-medium text-gray-700 px-1">Phone Numbers *</legend>
                             {formData.phones?.map((phoneItem, index) => (
                                 <div key={phoneItem.id || `new-phone-${index}`} className="grid grid-cols-6 gap-2 items-end">
