@@ -30,6 +30,7 @@ function LoginPage({ onLogin, switchToRegister, error, loading }) {
                         placeholder="your@email.com or +92..."
                         required
                         aria-label="Email or Phone Number"
+                        disabled={loading}
                     />
                 </div>
                 <div>
@@ -46,6 +47,7 @@ function LoginPage({ onLogin, switchToRegister, error, loading }) {
                             placeholder="••••••••"
                             required
                             aria-label="Password"
+                            disabled={loading}
                         />
                         <button
                             type="button"
