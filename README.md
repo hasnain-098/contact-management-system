@@ -139,7 +139,7 @@ Run frontend tests:
 Coverage is collected and reported via SonarQube.  
 Make sure SonarQube is running and your project is configured with the correct Quality Profile.  
 Run the Sonar scanner from the root of the project:
-```
+```bash
 # Example using npm script for Sonar scanner
 npm run sonar
 # Or directly via Sonar scanner CLI
