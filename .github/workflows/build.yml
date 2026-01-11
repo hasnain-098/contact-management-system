@@ -43,9 +43,4 @@ jobs:
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=hasnain-098_contact-management-system \
-          -Dsonar.projectName="Contact Management System" \
-          -Dsonar.organization=hasnain-098 \
-          -Dsonar.login=da6582a949951e2968d8f61600e75e4215ce7112
+        run: mvn -B verify sonar:sonar
