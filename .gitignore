@@ -31,6 +31,7 @@ backend/buildNumber.properties
 backend/.mvn/timing.properties
 backend/.mvn/wrapper/maven-wrapper.jar
 # Don't commit production secrets if using profiles
+backend/src/main/resources/application-dev.properties
 backend/src/main/resources/application-prod.properties
 backend/src/main/resources/application-staging.properties
 
