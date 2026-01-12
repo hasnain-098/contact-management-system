@@ -115,7 +115,9 @@ mvn sonar:sonar
 Important configurations and environment variables:
 
 <ul>
-  <li><code>application.properties</code> or .env for database connection, JWT secrets, and server settings</li>
+  <li>.env (in backend/) - stores sensitive information locally (database credentials, JWT secrets)</li>
+  <li><code>application.properties</code> - points to the active Spring profile (dev by default)</li>
+  <li><code>application-dev.properties</code> - reads variables from your .env file for local development</li>
   <li>Database: MySQL (URL, username, password)</li>
   <li>JWT secret and token expiration time</li>
   <li>Coverage reports – collected via SonarQube</li>
