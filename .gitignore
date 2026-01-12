@@ -76,3 +76,6 @@ env/
 
 # settings.xml file
 settings.xml
+
+# .env files
+*.env
