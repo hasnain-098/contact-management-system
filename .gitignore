@@ -15,9 +15,7 @@ logs/
 
 # --- Environment Files ---
 # Avoid committing local environment variables
-.env
-.env*
-!*.env.example # Allow example env files
+*.env
 
 # --- Backend (Maven / Spring Boot in 'backend' folder) ---
 backend/target/
@@ -76,6 +74,3 @@ env/
 
 # settings.xml file
 settings.xml
-
-# .env files
-*.env
