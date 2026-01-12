@@ -63,22 +63,22 @@ contact-management-system/
 cd backend
 mvn install
 ```
-2. Configure Environment Variables
-   Create a .env file in the backend/ directory (based on .env.example) and provide your local settings:
+2. Configure Environment Variables  
+Create a .env file in the backend/ directory (based on .env.example) and provide your local settings:
 ```bash
 DB_URL=jdbc:mysql://localhost:3306/cms
 DB_USERNAME=root
 DB_PASSWORD=your_password
 JWT_SECRET_KEY=supersecretkey
 ```
-3. Configure Spring Boot
-   The backend uses application.properties to load settings.
-   By default, it uses the dev profile:
-```bash
-spring.profiles.active=dev
-```
-application-dev.properties reads variables from your .env file.
-No changes to this file are required locally - just make sure .env exists.
+3. Configure Spring Boot  
+  The backend uses application.properties to load settings.  
+  No changes to this file are required locally - just make sure .env exists.  
+  ```bash
+  spring.profiles.active=dev
+  ```
+  By default, it uses the dev profile:  
+  application-dev.properties reads variables from your .env file. 
 
 ### Running
 Start the backend server:
